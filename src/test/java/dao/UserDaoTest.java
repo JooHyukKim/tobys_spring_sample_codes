@@ -5,45 +5,37 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import user.springbook.dao.UserDao;
 import user.springbook.domain.User;
 
 import javax.sql.DataSource;
+import javax.xml.crypto.Data;
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * @DirtiesContext
- * 말그대로 컨텍스트에 손댄다는 것.
- * setUp 할 때마다 dataSource를 수정해주면, 컨텍스트에서 관리하는 @Autowired 된 빈의 데이터소스가 변경된다.
- * 이때 @DirtiesContext 를 사용하는데,
- *     사용하면 메소드(더티컨텍스트는 메소드에도 적용가능) 또는 클래스의 테스트가 종료될시
- *     다시 깨끗한? 새로운 컨텍스트를 생성해서 사용한다.
+ * 바로 아래 주석처리된 것들만 봐도 알수 있는것.
+ * 애플리케이션의 도움 없이 구체적인 내용으로 DI를 구현하기 위해
+ * @BeforeEach 메소드에 적용.
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = "/applicationContext.xml")
-@DirtiesContext
-public class JUnit3_UserDaoTest {
+@ContextConfiguration(locations = "/test-applicationContext.xml" )
+public class UserDaoTest {
+
     @Autowired
+    private ApplicationContext context;
     UserDao dao;
 
     @BeforeEach
-    public void setUp() {
-        DataSource dataSource = new SingleConnectionDataSource(
-                "jdbc:mysql://localhost:3306/testdb"
-                , "root"
-                , null
-                , true
-        );
-        dao.setDataSource(dataSource);
+    public void setUpEach(){
+        dao = context.getBean("UserDao", UserDao.class);
     }
-
 
     @Test
     public void xmlContextTest() throws SQLException, ClassNotFoundException {
