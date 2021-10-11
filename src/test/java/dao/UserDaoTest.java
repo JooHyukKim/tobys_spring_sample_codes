@@ -9,7 +9,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import user.springbook.dao.UserDaoJdbc;
+import user.springbook.dao.UserDao;
 import user.springbook.domain.User;
 
 import java.sql.SQLException;
@@ -27,15 +27,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = "/applicationContext.xml")
-public class UserDaoJdbcTest {
+public class UserDaoTest {
 
     @Autowired
     private ApplicationContext context;
-    UserDaoJdbc dao;
+    UserDao dao;
 
     @BeforeEach
     public void setUpEach() {
-        dao = context.getBean("UserDao", UserDaoJdbc.class);
+        dao = context.getBean("UserDao", UserDao.class);
     }
 
     @Test
@@ -51,7 +51,7 @@ public class UserDaoJdbcTest {
 
         dao.add(user);
 
-        User userAdded = dao.getUser(new User(user.getId()));
+        User userAdded = dao.get(user.getId());
 
         assertTrue(isTwoUsersEqual(user, userAdded));
 
@@ -63,18 +63,18 @@ public class UserDaoJdbcTest {
         testDeleteAndCount(dao);
     }
 
-    private void testDeleteAndCount(UserDaoJdbc dao) throws SQLException, ClassNotFoundException {
+    private void testDeleteAndCount(UserDao dao) throws SQLException, ClassNotFoundException {
         dao.deleteAll();
         assertEquals(dao.getCount(), 0);
 
         User user = new User();
         user.setName("김주혁");
-        user.setId("user" + dao.findAll().size());
+        user.setId("user" + dao.getAll().size());
         user.setPassword("1234");
 
         dao.add(user);
 
-        User user2 = dao.getUser(user);
+        User user2 = dao.get(user.getId());
 
         assertTrue(isTwoUsersEqual(user, user2));
 
@@ -109,24 +109,7 @@ public class UserDaoJdbcTest {
     }
 
     @Test
-    public void getCountSimple() throws SQLException, ClassNotFoundException {
-        dao.deleteAll();
-        assertEquals(0, dao.getCountSimple());
-
-        for (int i = 1; i < 6; i++) {
-            dao.add(
-                    new User("user" + i, "user" + i, "1234")
-            );
-            assertEquals(dao.getCountSimple(), i);
-        }
-
-        System.out.println(" getCountSimple success");
-        dao.deleteAll();
-    }
-
-
-    @Test
-    public void get()  {
+    public void get() {
         if (dao.getCount() != 0) {
             dao.deleteAll();
         }
@@ -137,10 +120,10 @@ public class UserDaoJdbcTest {
 
         assertEquals(dao.getCount(), 2);
 
-        User user1Get = dao.getUser(user1);
+        User user1Get = dao.get(user1.getId());
         assertTrue(isTwoUsersEqual(user1, user1Get));
 
-        User user2Get = dao.getUser(user2);
+        User user2Get = dao.get(user2.getId());
         assertTrue(isTwoUsersEqual(user2, user2Get));
     }
 
@@ -151,7 +134,7 @@ public class UserDaoJdbcTest {
         assertEquals(dao.getCount(), 0);
 
         Assertions.assertThrows(EmptyResultDataAccessException.class, () -> {
-            dao.getUser(new User("feiawfhoeaho"));
+            dao.get("feiawfhoeaho");
         });
     }
 
@@ -167,20 +150,20 @@ public class UserDaoJdbcTest {
         assertEquals(dao.getCount(), 0);
 
         Assertions.assertThrows(EmptyResultDataAccessException.class, () -> {
-            dao.getUser(new User("fehoaifhoaevhoa", "user01", "user01"));
+            dao.get("fehoaifhoaevhoa");
         });
     }
 
     @Test
     public void getUser() throws SQLException, ClassNotFoundException {
         dao.deleteAll();
-        assertEquals(0, dao.getCountSimple());
+        assertEquals(0, dao.getCount());
 
         User user1 = new User("user01", "user01", "user01");
 
         dao.add(user1);
 
-        User user2 = dao.getUser(user1);
+        User user2 = dao.get(user1.getId());
 
         assertTrue(isTwoUsersEqual(user1, user2));
     }
@@ -196,12 +179,12 @@ public class UserDaoJdbcTest {
             dao.add(user);
             Assertions.assertEquals(
                     i
-                    , dao.findAll().size()
+                    , dao.getAll().size()
             );
-            isTwoUsersEqual(user, dao.getUser(user));
+            isTwoUsersEqual(user, dao.get(user.getId()));
         }
 
-        List<User> finalList = dao.findAll();
+        List<User> finalList = dao.getAll();
         Assertions.assertTrue(finalList.size() == 11);
     }
 }

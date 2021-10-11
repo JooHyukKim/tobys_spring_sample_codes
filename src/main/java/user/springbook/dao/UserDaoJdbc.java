@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class UserDaoJdbc {
+public class UserDaoJdbc implements UserDao {
     private JdbcTemplate jdbcTemplate;
     private RowMapper<User> userMapper = new RowMapper<User>() {
         @Override
@@ -47,47 +47,30 @@ public class UserDaoJdbc {
         );
     }
 
+    @Override
+    public User get(String id) {
+        return this.jdbcTemplate.queryForObject(
+                "select * from users where id = ?"
+                , new Object[]{id}
+                , this.userMapper
+        );
+    }
+
+    @Override
+    public List<User> getAll() {
+        return this.jdbcTemplate.query(
+                "select * from users order by id",
+                this.userMapper);
+    }
+
 
     public void deleteAll() {
         this.jdbcTemplate.update("delete from users");
     }
 
     public int getCount() {
-        return this.jdbcTemplate.query(
-                new PreparedStatementCreator() {
-                    @Override
-                    public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-                        PreparedStatement ps = con.prepareStatement("select count(*) from users");
-                        return ps;
-                    }
-                }
-                , new ResultSetExtractor<Integer>() {
-                    @Override
-                    public Integer extractData(ResultSet rs) throws SQLException, DataAccessException {
-                        rs.next();
-                        return rs.getInt(1);
-                    }
-                }
-        );
-    }
-
-    public int getCountSimple() {
         return this.jdbcTemplate.queryForInt("select count(*) from users");
     }
 
-    public User getUser(User user1) {
-        return this.jdbcTemplate.queryForObject(
-                "select * from users where id = ?"
-                , new Object[]{user1.getId()}
-                , this.userMapper
-        );
-    }
 
-    public List<User> findAll() {
-        return this.jdbcTemplate.query(
-                "select * from users order by id",
-                this.userMapper);
-    }
-
-    ;
 }
