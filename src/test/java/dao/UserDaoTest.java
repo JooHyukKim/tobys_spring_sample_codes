@@ -22,10 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * 바로 아래 주석처리된 것들만 봐도 알수 있는것.
  * 애플리케이션의 도움 없이 구체적인 내용으로 DI를 구현하기 위해
+ *
  * @BeforeEach 메소드에 적용.
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = "/test-applicationContext.xml" )
+@ContextConfiguration(locations = "/applicationContext.xml")
 public class UserDaoTest {
 
     @Autowired
@@ -33,7 +34,7 @@ public class UserDaoTest {
     UserDao dao;
 
     @BeforeEach
-    public void setUpEach(){
+    public void setUpEach() {
         dao = context.getBean("UserDao", UserDao.class);
     }
 
@@ -46,7 +47,7 @@ public class UserDaoTest {
         User user = new User();
         user.setId("user" + 1);
         user.setName("user" + 1);
-        user.setPassword("1234" );
+        user.setPassword("1234");
 
         dao.add(user);
 
@@ -54,8 +55,8 @@ public class UserDaoTest {
 
         assertTrue(isTwoUsersEqual(user, userAdded));
 
-        System.out.println("---------------------------------------------------------------------------------" );
-        System.out.println("성공 : testing xmlType Context" );
+        System.out.println("---------------------------------------------------------------------------------");
+        System.out.println("성공 : testing xmlType Context");
         System.out.println(user);
         System.out.println(userAdded);
 
@@ -67,9 +68,9 @@ public class UserDaoTest {
         assertEquals(dao.getCount(), 0);
 
         User user = new User();
-        user.setName("김주혁" );
+        user.setName("김주혁");
         user.setId("user" + dao.getAll().size());
-        user.setPassword("1234" );
+        user.setPassword("1234");
 
         dao.add(user);
 
@@ -77,8 +78,8 @@ public class UserDaoTest {
 
         assertTrue(isTwoUsersEqual(user, user2));
 
-        System.out.println("---------------------------------------------------------------------------------" );
-        System.out.println("성공 : testing delete And Count" );
+        System.out.println("---------------------------------------------------------------------------------");
+        System.out.println("성공 : testing delete And Count");
 
     }
 
@@ -89,29 +90,30 @@ public class UserDaoTest {
         return true;
     }
 
-    @Test
-    public void annotationContextTest() throws SQLException, ClassNotFoundException {
+    /**/
+        @Test
+        public void annotationContextTest() throws SQLException, ClassNotFoundException {
 
-        dao.deleteAll();
+            dao.deleteAll();
 
 
-        assertEquals(dao.getCount(), 0);
-        User user = new User();
-        user.setId("user" + 1);
-        user.setName("user" + 1);
-        user.setPassword("1234" );
+            assertEquals(dao.getCount(), 0);
+            User user = new User();
+            user.setId("user" + 1);
+            user.setName("user" + 1);
+            user.setPassword("1234" );
 
-        dao.add(user);
+            dao.add(user);
 
-        User userAdded = dao.get(user.getId());
+            User userAdded = dao.get(user.getId());
 
-        assertTrue(isTwoUsersEqual(user, userAdded));
+            assertTrue(isTwoUsersEqual(user, userAdded));
 
-        System.out.println("---------------------------------------------------------------------------------" );
-        System.out.println("성공 : testing AnnotationType Context" );
-        System.out.println(user);
-        System.out.println(userAdded);
-    }
+            System.out.println("---------------------------------------------------------------------------------" );
+            System.out.println("성공 : testing AnnotationType Context" );
+            System.out.println(user);
+            System.out.println(userAdded);
+        }
 
     @Test
     public void getCount() throws SQLException, ClassNotFoundException {
@@ -121,12 +123,12 @@ public class UserDaoTest {
 
         for (int i = 1; i < 6; i++) {
             dao.add(
-                    new User("user" + i, "user" + i, "1234" )
+                    new User("user" + i, "user" + i, "1234")
             );
             assertEquals(dao.getCount(), i);
         }
 
-        System.out.println("getCountTest success" );
+        System.out.println("getCountTest success");
 
         dao.deleteAll();
     }
@@ -136,8 +138,8 @@ public class UserDaoTest {
         if (dao.getCount() != 0) {
             dao.deleteAll();
         }
-        User user1 = new User("user1", "name1", "password1" );
-        User user2 = new User("user2", "name2", "password2" );
+        User user1 = new User("user1", "name1", "password1");
+        User user2 = new User("user2", "name2", "password2");
         dao.add(user1);
         dao.add(user2);
 
@@ -157,7 +159,7 @@ public class UserDaoTest {
         assertEquals(dao.getCount(), 0);
 
         Assertions.assertThrows(SQLException.class, () -> {
-            dao.get("XZZZZ" );
+            dao.get("XZZZZ");
         });
 
 

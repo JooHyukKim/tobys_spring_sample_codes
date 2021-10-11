@@ -2,8 +2,6 @@ package user.springbook.dao;
 
 
 import org.springframework.dao.EmptyResultDataAccessException;
-import user.springbook.dao.statement.AddStatement;
-import user.springbook.dao.statement.DeleteAllStatement;
 import user.springbook.domain.User;
 
 import javax.sql.DataSource;
@@ -15,44 +13,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDao {
-
+    private JdbcContext jdbcContext;
     private DataSource dataSource;
 
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
-        Connection c = null;
-        PreparedStatement ps = null;
-        try {
-            c = dataSource.getConnection();
-
-            ps = stmt.makePreparedStatement(c);
-
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-
-                }
-            }
-        }
+    public void setJdbcContext(JdbcContext jdbcContext) {
+        this.jdbcContext = jdbcContext;
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
-        jdbcContextWithStatementStrategy(c -> {
+        this.jdbcContext.workWithStatementStrategy(c -> {
 
             PreparedStatement ps = c.prepareStatement(
                     "insert into users(id, name, password) values(?, ?, ?)"
@@ -66,7 +39,7 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException {
-        jdbcContextWithStatementStrategy(c -> {
+        this.jdbcContext.workWithStatementStrategy(c -> {
             PreparedStatement preparedStatement = c.prepareStatement("delete from users");
             return preparedStatement;
         });
