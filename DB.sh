@@ -40,8 +40,3 @@ echo " "
 docker pull mysql
 docker run --name mysql -e MYSQL_ROOT_PASSWORD=1234 --platform linux/x86_64 -d -p 3306:3306 mysql:latest
 
-create table users ( \
-  id varchar(10) primary key, \
-  name varchar(20) not null, \
-  password varchar(10) not null \
-);

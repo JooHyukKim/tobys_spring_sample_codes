@@ -3,25 +3,24 @@ package user.springbook.dao;
 
 import user.springbook.domain.User;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDao {
 
-    private ConnectionMaker connectionMaker;
+    private DataSource dataSource;
 
-//    public UserDao(ConnectionMaker connectionMaker) {
-//        this.connectionMaker = connectionMaker;
-//    }
-
-    public void setConnectionMaker(ConnectionMaker connectionMaker) {
-        this.connectionMaker = connectionMaker;
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
-        Connection c = connectionMaker.makeConnection();
+        Connection c = this.dataSource.getConnection();
 
         PreparedStatement ps = c.prepareStatement(
                 "insert into users(id, name, password) values(?, ?, ?)"
@@ -36,9 +35,29 @@ public class UserDao {
         c.close();
     }
 
-    public User get(String id) throws ClassNotFoundException, SQLException {
-        Connection c = connectionMaker.makeConnection();
+    public List<User> getAll() throws SQLException {
+        Connection c = this.dataSource.getConnection();
 
+        PreparedStatement ps = c.prepareStatement(
+                "select * from users"
+        );
+        ResultSet rs = ps.executeQuery();
+
+        List<User> users = new ArrayList<>();
+        while (rs.next()) {
+            User user = new User();
+            user.setId(rs.getString("id"));
+            user.setName(rs.getString("name"));
+            user.setPassword(rs.getString("password"));
+            users.add(user);
+        }
+
+        return users;
+    }
+
+    public User get(String id) throws ClassNotFoundException, SQLException {
+
+        Connection c = this.dataSource.getConnection();
 
         PreparedStatement ps = c.prepareStatement(
                 "select * from users where id = ?"
