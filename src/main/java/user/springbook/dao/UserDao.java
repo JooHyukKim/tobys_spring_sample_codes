@@ -1,6 +1,7 @@
 package user.springbook.dao;
 
 
+import com.mysql.cj.exceptions.MysqlErrorNumbers;
 import jdk.nashorn.internal.scripts.JD;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -9,6 +10,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import user.springbook.domain.User;
+import user.springbook.exception.DuplicateUserIdException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -36,7 +38,7 @@ public class UserDao {
         jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    public void add(User user) throws ClassNotFoundException, SQLException {
+    public void add(User user) {
         this.jdbcTemplate.update(
                 "insert into users(id, name, password) values(?,?,?)"
                 , user.getId()
@@ -46,11 +48,11 @@ public class UserDao {
     }
 
 
-    public void deleteAll() throws SQLException {
+    public void deleteAll() {
         this.jdbcTemplate.update("delete from users");
     }
 
-    public int getCount() throws SQLException {
+    public int getCount() {
         return this.jdbcTemplate.query(
                 new PreparedStatementCreator() {
                     @Override

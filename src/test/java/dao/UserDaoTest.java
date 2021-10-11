@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Description;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -151,7 +152,7 @@ public class UserDaoTest {
 
 
     @Test
-    public void get() throws SQLException, ClassNotFoundException {
+    public void get()  {
         if (dao.getCount() != 0) {
             dao.deleteAll();
         }
@@ -170,7 +171,7 @@ public class UserDaoTest {
     }
 
     @Test
-    public void getFailure() throws SQLException {
+    public void getFailure() {
 
         dao.deleteAll();
         assertEquals(dao.getCount(), 0);
@@ -181,7 +182,12 @@ public class UserDaoTest {
     }
 
     @Test
-    public void getUserFailure() throws SQLException {
+    public void addUserFailure() {
+
+    }
+
+    @Test
+    public void getUserFailure() {
 
         dao.deleteAll();
         assertEquals(dao.getCount(), 0);
