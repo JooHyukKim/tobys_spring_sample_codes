@@ -1,6 +1,7 @@
 package user.springbook.dao;
 
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import user.springbook.domain.User;
 
 import javax.sql.DataSource;
@@ -71,6 +72,10 @@ public class UserDao {
         user.setPassword(rs.getString("password"));
         user.setName(rs.getString("name"));
 
+        if (user == null) {
+            throw new EmptyResultDataAccessException(1);
+        }
+
         rs.close();
         ps.close();
         c.close();
@@ -78,4 +83,31 @@ public class UserDao {
         return user;
     }
 
+    public void deleteAll() throws SQLException {
+        Connection c = this.dataSource.getConnection();
+        PreparedStatement ps = c.prepareStatement(
+                "delete from users"
+        );
+        ps.executeUpdate();
+
+        ps.close();
+        c.close();
+    }
+
+    public int getCount() throws SQLException {
+        Connection c = dataSource.getConnection();
+        PreparedStatement ps = c.prepareStatement(
+                "select count(*) from users"
+        );
+
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        int count = rs.getInt(1);
+
+        rs.close();
+        ps.close();
+        c.close();
+
+        return count;
+    }
 }

@@ -10,7 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-public class Before_UserDaoTest {
+public class OldAndManual_UserDaoTest {
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         annotationContext();
@@ -19,7 +19,7 @@ public class Before_UserDaoTest {
 
     private static void xmlContext() throws SQLException, ClassNotFoundException {
         ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
-        UserDao dao = context.getBean("userDao", UserDao.class);
+        UserDao dao = context.getBean("UserDao", UserDao.class);
 
         List<User> userlist = dao.getAll();
 
