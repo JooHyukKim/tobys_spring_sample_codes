@@ -9,7 +9,31 @@ import user.springbook.domain.User;
 import java.sql.SQLException;
 
 public class UserDaoTest {
+
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
+        runDB();
+        testBeanFactory();
+    }
+
+    private static void testBeanFactory() {
+        System.out.println("how factory creates objects--------");
+        DaoFactory daoFactory = new DaoFactory();
+        UserDao user1 = daoFactory.UserDao();
+        UserDao user2 = daoFactory.UserDao();
+        System.out.println(user1);
+        System.out.println(user2);
+
+
+        System.out.println("how ApplicationContext creates objects--------");
+        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
+        UserDao user3 = context.getBean("UserDao", UserDao.class);
+        UserDao user4 = context.getBean("UserDao", UserDao.class);
+        System.out.println(user3);
+        System.out.println(user4);
+    }
+
+
+    public static void runDB() throws SQLException, ClassNotFoundException {
         ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
 
         UserDao dao = context.getBean("UserDao", UserDao.class);
