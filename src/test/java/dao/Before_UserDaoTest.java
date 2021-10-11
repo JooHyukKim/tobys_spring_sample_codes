@@ -10,7 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-public class UserDaoTest {
+public class Before_UserDaoTest {
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         annotationContext();
@@ -32,9 +32,16 @@ public class UserDaoTest {
 
         User userAdded = dao.get(user.getId());
 
-        System.out.println("---------------------------");
-        System.out.println("testing xmlType Context");
-        System.out.println(user);
+        if (!user.getName().equals(userAdded.getName())) {
+            System.out.println("테스트 실패 (name)");
+        } else if (!user.getPassword().equals(userAdded.getPassword())) {
+            System.out.println("테스트 실패 (password)");
+        } else {
+            System.out.println("---------------------------");
+            System.out.println("성공 : testing xmlType Context");
+            System.out.println(user);
+        }
+
     }
 
 
@@ -54,9 +61,14 @@ public class UserDaoTest {
 
         User userAdded = dao.get(user.getId());
 
-        System.out.println("---------------------------");
-        System.out.println("testing annotationtype Context");
-        System.out.println(user);
-
+        if (!user.getName().equals(userAdded.getName())) {
+            System.out.println("테스트 실패 (name)");
+        } else if (!user.getPassword().equals(userAdded.getPassword())) {
+            System.out.println("테스트 실패 (password)");
+        } else {
+            System.out.println("---------------------------");
+            System.out.println("성공 : testing xmlType Context");
+            System.out.println(user);
+        }
     }
 }
