@@ -8,7 +8,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="url" value="jdbc:mysql://localhost:3306/testdb"/>
         <property name="username" value="root"/>
     </bean>
-    <bean id="UserDao" class="user.springbook.dao.UserDao">
+    <bean id="UserDao" class="user.springbook.dao.UserDaoJdbc">
         <property name="dataSource" ref="dataSource"/>
     </bean>
 </beans>

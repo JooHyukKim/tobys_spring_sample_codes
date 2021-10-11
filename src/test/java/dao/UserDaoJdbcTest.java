@@ -6,11 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Description;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import user.springbook.dao.UserDao;
+import user.springbook.dao.UserDaoJdbc;
 import user.springbook.domain.User;
 
 import java.sql.SQLException;
@@ -28,15 +27,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = "/applicationContext.xml")
-public class UserDaoTest {
+public class UserDaoJdbcTest {
 
     @Autowired
     private ApplicationContext context;
-    UserDao dao;
+    UserDaoJdbc dao;
 
     @BeforeEach
     public void setUpEach() {
-        dao = context.getBean("UserDao", UserDao.class);
+        dao = context.getBean("UserDao", UserDaoJdbc.class);
     }
 
     @Test
@@ -64,7 +63,7 @@ public class UserDaoTest {
         testDeleteAndCount(dao);
     }
 
-    private void testDeleteAndCount(UserDao dao) throws SQLException, ClassNotFoundException {
+    private void testDeleteAndCount(UserDaoJdbc dao) throws SQLException, ClassNotFoundException {
         dao.deleteAll();
         assertEquals(dao.getCount(), 0);
 
@@ -89,31 +88,6 @@ public class UserDaoTest {
         assertEquals(user1.getName(), user2.getName());
         assertEquals(user1.getPassword(), user2.getPassword());
         return true;
-    }
-
-    /**/
-    @Test
-    public void annotationContextTest() throws SQLException, ClassNotFoundException {
-
-        dao.deleteAll();
-
-
-        assertEquals(dao.getCount(), 0);
-        User user = new User();
-        user.setId("user" + 1);
-        user.setName("user" + 1);
-        user.setPassword("1234");
-
-        dao.add(user);
-
-        User userAdded = dao.getUser(user);
-
-        assertTrue(isTwoUsersEqual(user, userAdded));
-
-        System.out.println("---------------------------------------------------------------------------------");
-        System.out.println("성공 : testing AnnotationType Context");
-        System.out.println(user);
-        System.out.println(userAdded);
     }
 
     @Test
