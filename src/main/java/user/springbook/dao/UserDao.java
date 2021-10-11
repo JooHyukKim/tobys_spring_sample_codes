@@ -20,18 +20,20 @@ import java.util.Collection;
 import java.util.List;
 
 public class UserDao {
-    private JdbcContext jdbcContext;
-    private DataSource dataSource;
     private JdbcTemplate jdbcTemplate;
+    private RowMapper<User> userMapper = new RowMapper<User>() {
+        @Override
+        public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+            User user = new User();
+            user.setId(rs.getString("id"));
+            user.setName(rs.getString("name"));
+            user.setPassword(rs.getString("password"));
+            return user;
+        }
+    };
 
     public void setDataSource(DataSource dataSource) {
         jdbcTemplate = new JdbcTemplate(dataSource);
-        // 직접 DI 구현 부분
-        this.jdbcContext = new JdbcContext();
-        this.jdbcContext.setDataSource(dataSource);
-
-        // JdbcContext 를 적용하지 않은 메소드를 위해 저장해두기
-        this.dataSource = dataSource;
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
@@ -46,63 +48,7 @@ public class UserDao {
 
     public void deleteAll() throws SQLException {
         this.jdbcTemplate.update("delete from users");
-//        this.jdbcTemplate.update(
-//                new PreparedStatementCreator() {
-//                    @Override
-//                    public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-//                        return con.prepareStatement("delete from users");
-//                    }
-//                }
-//        );
     }
-
-    public List<User> getAll() throws SQLException {
-        Connection c = this.dataSource.getConnection();
-
-        PreparedStatement ps = c.prepareStatement(
-                "select * from users"
-        );
-        ResultSet rs = ps.executeQuery();
-
-        List<User> users = new ArrayList<>();
-        while (rs.next()) {
-            User user = new User();
-            user.setId(rs.getString("id"));
-            user.setName(rs.getString("name"));
-            user.setPassword(rs.getString("password"));
-            users.add(user);
-        }
-
-        return users;
-    }
-
-    public User get(String id) throws ClassNotFoundException, SQLException {
-
-        Connection c = this.dataSource.getConnection();
-
-        PreparedStatement ps = c.prepareStatement(
-                "select * from users where id = ?"
-        );
-        ps.setString(1, id);
-
-        ResultSet rs = ps.executeQuery();
-        rs.next();
-        User user = new User();
-        user.setId(rs.getString("id"));
-        user.setPassword(rs.getString("password"));
-        user.setName(rs.getString("name"));
-
-        if (user == null) {
-            throw new EmptyResultDataAccessException(1);
-        }
-
-        rs.close();
-        ps.close();
-        c.close();
-
-        return user;
-    }
-
 
     public int getCount() throws SQLException {
         return this.jdbcTemplate.query(
@@ -131,31 +77,15 @@ public class UserDao {
         return this.jdbcTemplate.queryForObject(
                 "select * from users where id = ?"
                 , new Object[]{user1.getId()}
-                , new RowMapper<User>() {
-                    @Override
-                    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        User ret = new User(
-                                rs.getString("id")
-                                , rs.getString("name")
-                                , rs.getString("password")
-                        );
-                        return ret;
-                    }
-                }
+                , this.userMapper
         );
     }
 
     public List<User> findAll() {
-        return this.jdbcTemplate.query("select * from users order by id",
-                new RowMapper<User>() {
-                    @Override
-                    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        User user = new User();
-                        user.setId(rs.getString("id"));
-                        user.setName(rs.getString("name"));
-                        user.setPassword(rs.getString("password"));
-                        return user;
-                    }
-                });
+        return this.jdbcTemplate.query(
+                "select * from users order by id",
+                this.userMapper);
     }
+
+    ;
 }

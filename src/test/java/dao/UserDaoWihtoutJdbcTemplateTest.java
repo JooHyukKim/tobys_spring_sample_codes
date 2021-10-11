@@ -7,17 +7,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import user.springbook.dao.UserDao;
+import user.springbook.dao.UserDaoWithoutJdbcTemplate;
 import user.springbook.domain.User;
 
+import javax.sql.DataSource;
+import javax.xml.crypto.Data;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * 바로 아래 주석처리된 것들만 봐도 알수 있는것.
@@ -27,15 +29,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = "/applicationContext.xml")
-public class UserDaoTest {
+public class UserDaoWihtoutJdbcTemplateTest {
 
     @Autowired
     private ApplicationContext context;
-    UserDao dao;
+    UserDaoWithoutJdbcTemplate dao;
 
     @BeforeEach
     public void setUpEach() {
-        dao = context.getBean("UserDao", UserDao.class);
+        dao = context.getBean("UserDaoWithoutJdbcTemplate", UserDaoWithoutJdbcTemplate.class);
     }
 
     @Test
@@ -51,7 +53,7 @@ public class UserDaoTest {
 
         dao.add(user);
 
-        User userAdded = dao.getUser(new User(user.getId()));
+        User userAdded = dao.get(user.getId());
 
         assertTrue(isTwoUsersEqual(user, userAdded));
 
@@ -63,18 +65,18 @@ public class UserDaoTest {
         testDeleteAndCount(dao);
     }
 
-    private void testDeleteAndCount(UserDao dao) throws SQLException, ClassNotFoundException {
+    private void testDeleteAndCount(UserDaoWithoutJdbcTemplate dao) throws SQLException, ClassNotFoundException {
         dao.deleteAll();
         assertEquals(dao.getCount(), 0);
 
         User user = new User();
         user.setName("김주혁");
-        user.setId("user" + dao.findAll().size());
+        user.setId("user" + dao.getAll().size());
         user.setPassword("1234");
 
         dao.add(user);
 
-        User user2 = dao.getUser(user);
+        User user2 = dao.get(user.getId());
 
         assertTrue(isTwoUsersEqual(user, user2));
 
@@ -105,7 +107,7 @@ public class UserDaoTest {
 
         dao.add(user);
 
-        User userAdded = dao.getUser(user);
+        User userAdded = dao.get(user.getId());
 
         assertTrue(isTwoUsersEqual(user, userAdded));
 
@@ -162,10 +164,10 @@ public class UserDaoTest {
 
         assertEquals(dao.getCount(), 2);
 
-        User user1Get = dao.getUser(user1);
+        User user1Get = dao.get(user1.getId());
         assertTrue(isTwoUsersEqual(user1, user1Get));
 
-        User user2Get = dao.getUser(user2);
+        User user2Get = dao.get(user2.getId());
         assertTrue(isTwoUsersEqual(user2, user2Get));
     }
 
@@ -175,8 +177,8 @@ public class UserDaoTest {
         dao.deleteAll();
         assertEquals(dao.getCount(), 0);
 
-        Assertions.assertThrows(EmptyResultDataAccessException.class, () -> {
-            dao.getUser(new User("feiawfhoeaho"));
+        Assertions.assertThrows(SQLException.class, () -> {
+            dao.get("XZZZZ");
         });
     }
 
