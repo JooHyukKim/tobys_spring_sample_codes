@@ -1,20 +1,21 @@
-package test.dao;
+package dao;
 
-import main.user.springbook.dao.ConnectionMaker;
-import main.user.springbook.dao.DConnectionMaker;
-import main.user.springbook.dao.DaoFactory;
-import main.user.springbook.dao.UserDao;
-import main.user.springbook.domain.User;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import user.springbook.dao.DaoFactory;
+import user.springbook.dao.UserDao;
+import user.springbook.domain.User;
 
 import java.sql.SQLException;
 
 public class UserDaoTest {
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
+        ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
 
-        UserDao dao = new DaoFactory().UserDao();
+        UserDao dao = context.getBean("UserDao", UserDao.class);
 
         User user = new User();
-        user.setId("user5");
+        user.setId("user6");
         user.setName("Kim Joo Hyuk");
         user.setPassword("1234");
 

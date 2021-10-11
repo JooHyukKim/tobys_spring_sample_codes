@@ -1,4 +1,4 @@
-package main.user.springbook.dao;
+package user.springbook.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
