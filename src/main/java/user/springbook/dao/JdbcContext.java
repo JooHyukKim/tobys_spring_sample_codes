@@ -12,6 +12,21 @@ public class JdbcContext {
         this.dataSource = dataSource;
     }
 
+    public void executeSql(final String query) throws SQLException {
+        workWithStatementStrategy(new StatementStrategy() {
+            @Override
+            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+                PreparedStatement preparedStatement = c.prepareStatement(query);
+                return preparedStatement;
+            }
+        });
+       /* 람다식을 활용한 익명 내부
+        workWithStatementStrategy(c -> {
+            PreparedStatement ps = c.prepareStatement(query);
+            return ps;
+        });*/
+    }
+
     public void workWithStatementStrategy(StatementStrategy stmt) throws SQLException {
         Connection c = null;
         PreparedStatement ps = null;

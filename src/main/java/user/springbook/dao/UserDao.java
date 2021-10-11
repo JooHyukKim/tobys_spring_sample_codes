@@ -26,10 +26,6 @@ public class UserDao {
         this.dataSource = dataSource;
     }
 
-    public void setJdbcContext(JdbcContext jdbcContext) {
-
-    }
-
     public void add(User user) throws ClassNotFoundException, SQLException {
         this.jdbcContext.workWithStatementStrategy(c -> {
 
@@ -44,11 +40,9 @@ public class UserDao {
 
     }
 
+
     public void deleteAll() throws SQLException {
-        this.jdbcContext.workWithStatementStrategy(c -> {
-            PreparedStatement preparedStatement = c.prepareStatement("delete from users");
-            return preparedStatement;
-        });
+        this.jdbcContext.executeSql("delete from users");
     }
 
     public List<User> getAll() throws SQLException {
