@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -15,9 +16,10 @@ import user.springbook.domain.User;
 import javax.sql.DataSource;
 import javax.xml.crypto.Data;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * 바로 아래 주석처리된 것들만 봐도 알수 있는것.
@@ -91,29 +93,29 @@ public class UserDaoTest {
     }
 
     /**/
-        @Test
-        public void annotationContextTest() throws SQLException, ClassNotFoundException {
+    @Test
+    public void annotationContextTest() throws SQLException, ClassNotFoundException {
 
-            dao.deleteAll();
+        dao.deleteAll();
 
 
-            assertEquals(dao.getCount(), 0);
-            User user = new User();
-            user.setId("user" + 1);
-            user.setName("user" + 1);
-            user.setPassword("1234" );
+        assertEquals(dao.getCount(), 0);
+        User user = new User();
+        user.setId("user" + 1);
+        user.setName("user" + 1);
+        user.setPassword("1234");
 
-            dao.add(user);
+        dao.add(user);
 
-            User userAdded = dao.get(user.getId());
+        User userAdded = dao.get(user.getId());
 
-            assertTrue(isTwoUsersEqual(user, userAdded));
+        assertTrue(isTwoUsersEqual(user, userAdded));
 
-            System.out.println("---------------------------------------------------------------------------------" );
-            System.out.println("성공 : testing AnnotationType Context" );
-            System.out.println(user);
-            System.out.println(userAdded);
-        }
+        System.out.println("---------------------------------------------------------------------------------");
+        System.out.println("성공 : testing AnnotationType Context");
+        System.out.println(user);
+        System.out.println(userAdded);
+    }
 
     @Test
     public void getCount() throws SQLException, ClassNotFoundException {
@@ -132,6 +134,23 @@ public class UserDaoTest {
 
         dao.deleteAll();
     }
+
+    @Test
+    public void getCountSimple() throws SQLException, ClassNotFoundException {
+        dao.deleteAll();
+        assertEquals(0, dao.getCountSimple());
+
+        for (int i = 1; i < 6; i++) {
+            dao.add(
+                    new User("user" + i, "user" + i, "1234")
+            );
+            assertEquals(dao.getCountSimple(), i);
+        }
+
+        System.out.println(" getCountSimple success");
+        dao.deleteAll();
+    }
+
 
     @Test
     public void get() throws SQLException, ClassNotFoundException {
@@ -153,7 +172,7 @@ public class UserDaoTest {
     }
 
     @Test
-    public void getUserFailure() throws SQLException {
+    public void getFailure() throws SQLException {
 
         dao.deleteAll();
         assertEquals(dao.getCount(), 0);
@@ -161,8 +180,50 @@ public class UserDaoTest {
         Assertions.assertThrows(SQLException.class, () -> {
             dao.get("XZZZZ");
         });
-
-
     }
 
+    @Test
+    public void getUserFailure() throws SQLException {
+
+        dao.deleteAll();
+        assertEquals(dao.getCount(), 0);
+
+        Assertions.assertThrows(EmptyResultDataAccessException.class, () -> {
+            dao.getUser(new User("fehoaifhoaevhoa", "user01", "user01"));
+        });
+    }
+
+    @Test
+    public void getUser() throws SQLException, ClassNotFoundException {
+        dao.deleteAll();
+        assertEquals(0, dao.getCountSimple());
+
+        User user1 = new User("user01", "user01", "user01");
+
+        dao.add(user1);
+
+        User user2 = dao.getUser(user1);
+
+        assertTrue(isTwoUsersEqual(user1, user2));
+    }
+
+    @Test
+    public void findALl() throws SQLException, ClassNotFoundException {
+        dao.deleteAll();
+
+        List<User> userlist = new ArrayList<>();
+        for (int i = 1; i < 12; i++) {
+            User user = new User("user" + i, "user" + i, "user" + i);
+            userlist.add(user);
+            dao.add(user);
+            Assertions.assertEquals(
+                    i
+                    , dao.findAll().size()
+            );
+            isTwoUsersEqual(user, dao.getUser(user));
+        }
+
+        List<User> finalList = dao.findAll();
+        Assertions.assertTrue(finalList.size() == 11);
+    }
 }
