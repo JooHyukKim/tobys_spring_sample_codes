@@ -1,6 +1,7 @@
 package user.springbook.dao;
 
 
+import jdk.nashorn.internal.scripts.JD;
 import org.springframework.dao.EmptyResultDataAccessException;
 import user.springbook.domain.User;
 
@@ -17,11 +18,16 @@ public class UserDao {
     private DataSource dataSource;
 
     public void setDataSource(DataSource dataSource) {
+        // 직접 DI 구현 부분
+        this.jdbcContext = new JdbcContext();
+        this.jdbcContext.setDataSource(dataSource);
+
+        // JdbcContext 를 적용하지 않은 메소드를 위해 저장해두기
         this.dataSource = dataSource;
     }
 
     public void setJdbcContext(JdbcContext jdbcContext) {
-        this.jdbcContext = jdbcContext;
+
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {

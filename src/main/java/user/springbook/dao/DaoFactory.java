@@ -19,13 +19,6 @@ public class DaoFactory {
     }
 
     @Bean
-    public JdbcContext JdbcContext() throws ClassNotFoundException {
-        JdbcContext jdbcContext = new JdbcContext();
-        jdbcContext.setDataSource(this.datasource());
-        return jdbcContext;
-    }
-
-    @Bean
     public DataSource datasource() throws ClassNotFoundException {
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
 
