@@ -1,35 +1,49 @@
 package dao;
 
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Description;
-import org.springframework.context.support.GenericXmlApplicationContext;
-import org.springframework.dao.EmptyResultDataAccessException;
-import user.springbook.dao.DaoFactory;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import user.springbook.dao.UserDao;
 import user.springbook.domain.User;
 
-import java.lang.reflect.Executable;
+import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class JUnit_UserDaoTest {
+/**
+ * @DirtiesContext
+ * 말그대로 컨텍스트에 손댄다는 것.
+ * setUp 할 때마다 dataSource를 수정해주면, 컨텍스트에서 관리하는 @Autowired 된 빈의 데이터소스가 변경된다.
+ * 이때 @DirtiesContext 를 사용하는데,
+ *     사용하면 메소드(더티컨텍스트는 메소드에도 적용가능) 또는 클래스의 테스트가 종료될시
+ *     다시 깨끗한? 새로운 컨텍스트를 생성해서 사용한다.
+ */
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(locations = "/applicationContext.xml")
+@DirtiesContext
+public class JUnit3_UserDaoTest {
+    @Autowired
+    UserDao dao;
 
-    private UserDao dao;
-
-    @BeforeAll
+    @BeforeEach
     public void setUp() {
-        ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
-        this.dao = context.getBean("UserDao", UserDao.class);
+        DataSource dataSource = new SingleConnectionDataSource(
+                "jdbc:mysql://localhost:3306/testdb"
+                , "root"
+                , null
+                , true
+        );
+        dao.setDataSource(dataSource);
     }
+
 
     @Test
     public void xmlContextTest() throws SQLException, ClassNotFoundException {
@@ -40,7 +54,7 @@ public class JUnit_UserDaoTest {
         User user = new User();
         user.setId("user" + 1);
         user.setName("user" + 1);
-        user.setPassword("1234");
+        user.setPassword("1234" );
 
         dao.add(user);
 
@@ -48,8 +62,8 @@ public class JUnit_UserDaoTest {
 
         assertTrue(isTwoUsersEqual(user, userAdded));
 
-        System.out.println("---------------------------------------------------------------------------------");
-        System.out.println("성공 : testing xmlType Context");
+        System.out.println("---------------------------------------------------------------------------------" );
+        System.out.println("성공 : testing xmlType Context" );
         System.out.println(user);
         System.out.println(userAdded);
 
@@ -61,9 +75,9 @@ public class JUnit_UserDaoTest {
         assertEquals(dao.getCount(), 0);
 
         User user = new User();
-        user.setName("김주혁");
+        user.setName("김주혁" );
         user.setId("user" + dao.getAll().size());
-        user.setPassword("1234");
+        user.setPassword("1234" );
 
         dao.add(user);
 
@@ -71,8 +85,8 @@ public class JUnit_UserDaoTest {
 
         assertTrue(isTwoUsersEqual(user, user2));
 
-        System.out.println("---------------------------------------------------------------------------------");
-        System.out.println("성공 : testing delete And Count");
+        System.out.println("---------------------------------------------------------------------------------" );
+        System.out.println("성공 : testing delete And Count" );
 
     }
 
@@ -93,7 +107,7 @@ public class JUnit_UserDaoTest {
         User user = new User();
         user.setId("user" + 1);
         user.setName("user" + 1);
-        user.setPassword("1234");
+        user.setPassword("1234" );
 
         dao.add(user);
 
@@ -101,8 +115,8 @@ public class JUnit_UserDaoTest {
 
         assertTrue(isTwoUsersEqual(user, userAdded));
 
-        System.out.println("---------------------------------------------------------------------------------");
-        System.out.println("성공 : testing AnnotationType Context");
+        System.out.println("---------------------------------------------------------------------------------" );
+        System.out.println("성공 : testing AnnotationType Context" );
         System.out.println(user);
         System.out.println(userAdded);
     }
@@ -115,12 +129,12 @@ public class JUnit_UserDaoTest {
 
         for (int i = 1; i < 6; i++) {
             dao.add(
-                    new User("user" + i, "user" + i, "1234")
+                    new User("user" + i, "user" + i, "1234" )
             );
             assertEquals(dao.getCount(), i);
         }
 
-        System.out.println("getCountTest success");
+        System.out.println("getCountTest success" );
 
         dao.deleteAll();
     }
@@ -130,8 +144,8 @@ public class JUnit_UserDaoTest {
         if (dao.getCount() != 0) {
             dao.deleteAll();
         }
-        User user1 = new User("user1", "name1", "password1");
-        User user2 = new User("user2", "name2", "password2");
+        User user1 = new User("user1", "name1", "password1" );
+        User user2 = new User("user2", "name2", "password2" );
         dao.add(user1);
         dao.add(user2);
 
@@ -151,11 +165,10 @@ public class JUnit_UserDaoTest {
         assertEquals(dao.getCount(), 0);
 
         Assertions.assertThrows(SQLException.class, () -> {
-            dao.get("XZZZZ");
+            dao.get("XZZZZ" );
         });
 
 
     }
-
 
 }
