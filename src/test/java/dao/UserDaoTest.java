@@ -6,18 +6,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import user.springbook.dao.UserDao;
 import user.springbook.domain.User;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * 바로 아래 주석처리된 것들만 봐도 알수 있는것.
@@ -31,12 +36,15 @@ public class UserDaoTest {
 
     @Autowired
     private ApplicationContext context;
+    @Autowired
+    private DataSource dataSource;
     UserDao dao;
 
     @BeforeEach
     public void setUpEach() {
         dao = context.getBean("UserDao", UserDao.class);
     }
+
 
     @Test
     public void xmlContextTest() throws SQLException, ClassNotFoundException {
@@ -187,4 +195,45 @@ public class UserDaoTest {
         List<User> finalList = dao.getAll();
         Assertions.assertTrue(finalList.size() == 11);
     }
+
+    @Test
+    public void duplicateUserId() {
+        dao.deleteAll();
+        User user = new User("user01", "user01", "user01");
+        dao.add(user);
+        Assertions.assertThrows(DuplicateKeyException.class, () -> {
+            dao.add(user);
+        });
+
+    }
+
+    /**
+     * DataSource를 활용해 SQLException에서 직접 DuplicateKeyException으로 전환하는 기능을 확인해보는 학습 테스트다.
+     */
+    @Test
+    public void sqlExceptionTranslate() {
+        dao.deleteAll();
+        User user1 = new User("user01", "user01", "user01");
+        assertThrows(DataAccessException.class, () -> {
+
+            dao.add(user1);
+            dao.add(user1);
+        });
+
+        // 아래 방법으로도 에러의 타입을 체크 할수 있다.
+//        try {
+//
+//        } catch (DuplicateKeyException ex) {
+//            SQLException sqlException = (SQLException) ex.getRootCause();
+//            SQLExceptionTranslator set = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
+//
+//            DataAccessException e = set.translate(null, null, sqlException);
+//
+//            Assertions.assertEquals(
+//                    e
+//                    , SQLIntegrityConstraintViolationException.class
+//            );
+//        }
+    }
+
 }
