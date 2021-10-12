@@ -10,6 +10,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 import user.springbook.dao.UserDao;
 import user.springbook.domain.Level;
 import user.springbook.domain.User;
@@ -35,9 +36,10 @@ public class UserServiceTest {
     UserService userService;
     @Autowired
     UserDao userDao;
-
     @Autowired
-    DataSource dataSource;
+    PlatformTransactionManager transactionManager;
+
+
     List<User> userlist;
 
     @BeforeEach
@@ -110,7 +112,7 @@ public class UserServiceTest {
 
         // 빈으로 등록 할것이 아니므로 수동으로 DI 해준다.
         testUserService.setUserDao(this.userDao);
-        testUserService.setDataSource(this.dataSource);
+        testUserService.setTransactionManager(this.transactionManager);
 
         userDao.deleteAll();
 
