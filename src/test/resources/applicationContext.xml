@@ -16,5 +16,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
     <bean id="userService" class="user.springbook.service.UserService">
         <property name="UserDao" ref="userDao"/>
+        <property name="UpgradePolicy" ref="UpgradePolicy"></property>
+    </bean>
+
+    <bean id="UpgradePolicy" class="user.springbook.service.CommonUserLevelUpgradePolicy">
     </bean>
 </beans>

@@ -12,8 +12,8 @@ import user.springbook.domain.Level;
 import user.springbook.domain.User;
 import user.springbook.service.UserService;
 
-import static user.springbook.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static user.springbook.service.UserService.MIN_RECOMMENDED_FOR_GOLD;
+import static user.springbook.service.CommonUserLevelUpgradePolicy.MIN_LOGCOUNT_FOR_SILVER;
+import static user.springbook.service.CommonUserLevelUpgradePolicy.MIN_RECOMMENDED_FOR_GOLD;
 
 import java.util.Arrays;
 import java.util.List;
