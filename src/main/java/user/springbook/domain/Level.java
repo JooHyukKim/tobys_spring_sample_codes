@@ -1,19 +1,28 @@
 package user.springbook.domain;
 
 public enum Level {
-    BASIC(1), SILVER(2), GOLD(3);
+    BASIC(1, 2),
+    SILVER(2, 3),
+    GOLD(3, null);
 
-    private final int value;
+    private final Integer value;
+    private final Integer next;
 
-    Level(int value) {
+    Level(Integer value, Integer next) {
         this.value = value;
+        this.next = next;
     }
 
-    public int intValue() {
+    public Integer intValue() {
         return value;
     }
 
-    public static Level valueOf(int value) {
+    public Level nextLevel() {
+        if (this.next == null) return null;
+        return valueOf(this.next);
+    }
+
+    public static Level valueOf(Integer value) {
         switch (value) {
             case 1:
                 return BASIC;
