@@ -14,6 +14,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import user.springbook.dao.UserDao;
+import user.springbook.domain.Level;
 import user.springbook.domain.User;
 
 import javax.sql.DataSource;
@@ -31,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @BeforeEach 메소드에 적용.
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = "/applicationContext.xml")
+@ContextConfiguration(locations = "/test-applicationContext.xml")
 public class UserDaoTest {
 
     @Autowired
@@ -40,9 +41,17 @@ public class UserDaoTest {
     private DataSource dataSource;
     UserDao dao;
 
+    User user1;
+    User user2;
+    User user3;
+
     @BeforeEach
     public void setUpEach() {
-        dao = context.getBean("UserDao", UserDao.class);
+        dao = context.getBean("userDao", UserDao.class);
+        this.user1 = new User("user1", "user1", "1234", Level.BASIC, 1, 0);
+        this.user2 = new User("user2", "user2", "1234", Level.SILVER, 55, 10);
+        this.user3 = new User("user3", "user3", "1234", Level.GOLD, 100, 40);
+
     }
 
 
@@ -52,20 +61,16 @@ public class UserDaoTest {
 
 
         assertEquals(dao.getCount(), 0);
-        User user = new User();
-        user.setId("user" + 1);
-        user.setName("user" + 1);
-        user.setPassword("1234");
 
-        dao.add(user);
+        dao.add(user1);
 
-        User userAdded = dao.get(user.getId());
+        User userAdded = dao.get(user1.getId());
 
-        assertTrue(isTwoUsersEqual(user, userAdded));
+        assertTrue(isTwoUsersEqual(user1, userAdded));
 
         System.out.println("---------------------------------------------------------------------------------");
         System.out.println("성공 : testing xmlType Context");
-        System.out.println(user);
+        System.out.println(user1);
         System.out.println(userAdded);
 
         testDeleteAndCount(dao);
@@ -75,16 +80,11 @@ public class UserDaoTest {
         dao.deleteAll();
         assertEquals(dao.getCount(), 0);
 
-        User user = new User();
-        user.setName("김주혁");
-        user.setId("user" + dao.getAll().size());
-        user.setPassword("1234");
+        dao.add(user1);
 
-        dao.add(user);
+        User user2 = dao.get(user1.getId());
 
-        User user2 = dao.get(user.getId());
-
-        assertTrue(isTwoUsersEqual(user, user2));
+        assertTrue(isTwoUsersEqual(user1, user2));
 
         System.out.println("---------------------------------------------------------------------------------");
         System.out.println("성공 : testing delete And Count");
@@ -95,6 +95,9 @@ public class UserDaoTest {
         assertEquals(user1.getId(), user2.getId());
         assertEquals(user1.getName(), user2.getName());
         assertEquals(user1.getPassword(), user2.getPassword());
+        assertEquals(user1.getLevel(), user2.getLevel());
+        assertEquals(user1.getLogin(), user2.getLogin());
+        assertEquals(user1.getRecommend(), user2.getRecommend());
         return true;
     }
 
@@ -106,7 +109,7 @@ public class UserDaoTest {
 
         for (int i = 1; i < 6; i++) {
             dao.add(
-                    new User("user" + i, "user" + i, "1234")
+                    new User("user" + i, "user" + i, "1234", Level.BASIC, 1, 0)
             );
             assertEquals(dao.getCount(), i);
         }
@@ -121,8 +124,6 @@ public class UserDaoTest {
         if (dao.getCount() != 0) {
             dao.deleteAll();
         }
-        User user1 = new User("user1", "name1", "password1");
-        User user2 = new User("user2", "name2", "password2");
         dao.add(user1);
         dao.add(user2);
 
@@ -147,11 +148,6 @@ public class UserDaoTest {
     }
 
     @Test
-    public void addUserFailure() {
-
-    }
-
-    @Test
     public void getUserFailure() {
 
         dao.deleteAll();
@@ -167,8 +163,6 @@ public class UserDaoTest {
         dao.deleteAll();
         assertEquals(0, dao.getCount());
 
-        User user1 = new User("user01", "user01", "user01");
-
         dao.add(user1);
 
         User user2 = dao.get(user1.getId());
@@ -182,7 +176,7 @@ public class UserDaoTest {
 
         List<User> userlist = new ArrayList<>();
         for (int i = 1; i < 12; i++) {
-            User user = new User("user" + i, "user" + i, "user" + i);
+            User user = new User("user" + i, "user" + i, "user" + i, user1.getLevel(), user1.getLogin(), user1.getRecommend());
             userlist.add(user);
             dao.add(user);
             Assertions.assertEquals(
@@ -199,10 +193,9 @@ public class UserDaoTest {
     @Test
     public void duplicateUserId() {
         dao.deleteAll();
-        User user = new User("user01", "user01", "user01");
-        dao.add(user);
+        dao.add(user1);
         Assertions.assertThrows(DuplicateKeyException.class, () -> {
-            dao.add(user);
+            dao.add(user1);
         });
 
     }
@@ -213,27 +206,34 @@ public class UserDaoTest {
     @Test
     public void sqlExceptionTranslate() {
         dao.deleteAll();
-        User user1 = new User("user01", "user01", "user01");
         assertThrows(DataAccessException.class, () -> {
-
             dao.add(user1);
             dao.add(user1);
         });
-
-        // 아래 방법으로도 에러의 타입을 체크 할수 있다.
-//        try {
-//
-//        } catch (DuplicateKeyException ex) {
-//            SQLException sqlException = (SQLException) ex.getRootCause();
-//            SQLExceptionTranslator set = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
-//
-//            DataAccessException e = set.translate(null, null, sqlException);
-//
-//            Assertions.assertEquals(
-//                    e
-//                    , SQLIntegrityConstraintViolationException.class
-//            );
-//        }
     }
+
+    @Test
+    public void update() {
+        dao.deleteAll();
+
+        dao.add(user1);
+        dao.add(user2);
+
+        user1.setLogin(333);
+        user1.setRecommend(321);
+        user1.setLevel(Level.GOLD);
+        user1.setPassword("4321");
+        user1.setName("주혀킴");
+
+        dao.update(user1);
+
+        User updatedUser = dao.get(user1.getId());
+        isTwoUsersEqual(user1, updatedUser);
+
+        User user2same = dao.get(user2.getId());
+        isTwoUsersEqual(user2, user2same);
+
+    }
+
 
 }
