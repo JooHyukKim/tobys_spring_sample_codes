@@ -45,3 +45,4 @@ gradle-app.setting
 .idea/libraries/spring_context_5_3_9.xml
 .idea/jarRepositories.xml
 .idea/gradle.xml
+.idea/misc.xml
