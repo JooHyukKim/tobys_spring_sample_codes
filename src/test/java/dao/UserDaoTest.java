@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @BeforeEach 메소드에 적용.
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = "/test-applicationContext.xml")
+@ContextConfiguration(locations = "/applicationContext.xml")
 public class UserDaoTest {
 
     @Autowired

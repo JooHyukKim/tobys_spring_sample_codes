@@ -16,5 +16,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
     <bean id="userService" class="user.springbook.service.UserService">
         <property name="UserDao" ref="userDao"/>
+        <property name="dataSource"  ref="dataSource"/>
     </bean>
 </beans>

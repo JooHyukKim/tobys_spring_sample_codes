@@ -5,6 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Description;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import user.springbook.dao.UserDao;
@@ -12,16 +15,20 @@ import user.springbook.domain.Level;
 import user.springbook.domain.User;
 import user.springbook.service.UserService;
 
+import javax.sql.DataSource;
+import javax.xml.crypto.Data;
+
 import static user.springbook.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
 import static user.springbook.service.UserService.MIN_RECOMMENDED_FOR_GOLD;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration("/test-applicationContext.xml")
+@ContextConfiguration("/applicationContext.xml")
 public class UserServiceTest {
 
     @Autowired
@@ -29,6 +36,8 @@ public class UserServiceTest {
     @Autowired
     UserDao userDao;
 
+    @Autowired
+    DataSource dataSource;
     List<User> userlist;
 
     @BeforeEach
@@ -51,7 +60,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void upgradeLevels() {
+    public void upgradeLevels() throws SQLException {
         userDao.deleteAll();
         userlist.forEach(user -> {
             userDao.add(user);
@@ -70,9 +79,9 @@ public class UserServiceTest {
     private void checkLevel(User user, boolean hasBeenUpgraded) {
         User userUpdated = userDao.get(user.getId());
         if (hasBeenUpgraded) {
-            assertNotEquals(userUpdated.getLevel(), user.getLevel());
+            assertNotEquals(user.getLevel(), userUpdated.getLevel());
         } else {
-            assertEquals(userUpdated.getLevel(), user.getLevel());
+            assertEquals(user.getLevel(), userUpdated.getLevel());
         }
     }
 
@@ -94,5 +103,47 @@ public class UserServiceTest {
         assertEquals(userWithoutLevelRead.getLevel(), Level.BASIC);
     }
 
+    @Test
+    @Description("트랜잭션 테스트")
+    public void upgradeAllOrNothing() {
+        UserService testUserService = new TestUserService(userlist.get(3).getId());
+
+        // 빈으로 등록 할것이 아니므로 수동으로 DI 해준다.
+        testUserService.setUserDao(this.userDao);
+        testUserService.setDataSource(this.dataSource);
+
+        userDao.deleteAll();
+
+        for (User user :
+                userlist) {
+            testUserService.add(user);
+        }
+
+        try {
+            testUserService.upgradeLevels();
+            fail("TestUserServiceException expected");
+        } catch (TestUserServiceException | SQLException e) {
+
+        }
+        checkLevel(userlist.get(1), false);
+    }
 
 }
+
+class TestUserService extends UserService {
+    private String id;
+
+    public TestUserService(String id) {
+        this.id = id;
+    }
+
+    @Override
+    protected void upgradeLevel(User user) {
+        if (user.getId().equals(this.id)) {
+            throw new TestUserServiceException();
+        }
+        super.upgradeLevel(user);
+
+    }
+}
+
