@@ -23,17 +23,27 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <bean id="userService" class="user.springbook.service.TxProxyFactoryBean">
+    <bean id="userService" class="org.springframework.aop.framework.ProxyFactoryBean">
         <property name="target" ref="userServiceImpl"/>
-        <property name="transactionManager" ref="trasactionManager"/>
-        <property name="pattern" value="upgradeLevels"/>
-        <property name="serviceInterface" value="user.springbook.service.UserService"/>
+        <property name="interceptorNames">
+            <list>
+                <value>transactionAdvisor</value>
+            </list>
+        </property>
     </bean>
 
     <bean id="mailSender" class="user.springbook.service.DummyMailSender">
     </bean>
 
-    <bean id="message" class="user.springbook.example.MessageFactoryBean">
-        <property name="text" value="Factory Bean"/>
+    <bean id="transactionAdvice" class="user.springbook.service.TransactionAdvice">
+        <property name="transactionManager" ref="trasactionManager"/>
+    </bean>
+
+    <bean id="transactionPointcut" class="org.springframework.aop.support.NameMatchMethodPointcut">
+        <property name="mappedName" value="upgrade*"/>
+    </bean>
+    <bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+        <property name="advice" ref="transactionAdvice"/>
+        <property name="pointcut" ref="transactionPointcut"/>
     </bean>
 </beans>
