@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
+import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -17,6 +19,7 @@ import user.springbook.domain.User;
 import user.springbook.service.UserService;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -77,6 +80,31 @@ public class UserServiceTest {
         checkLevel(userlist.get(2), false);
         checkLevel(userlist.get(3), true);
         checkLevel(userlist.get(4), false);
+    }
+
+    @Test
+    @DirtiesContext
+    public void upgradeLevelsMock() throws Exception {
+        userDao.deleteAll();
+        for (User user :
+                userlist) {
+            userDao.add(user);
+        }
+
+        MockMailSender mockMailSender = new MockMailSender();
+        userService.setMailSender(mockMailSender);
+
+        userService.upgradeLevels();
+        checkLevel(userlist.get(0), false);
+        checkLevel(userlist.get(1), true);
+        checkLevel(userlist.get(2), false);
+        checkLevel(userlist.get(3), true);
+        checkLevel(userlist.get(4), false);
+
+        List<String> reuqst = mockMailSender.getRequests();
+        assertEquals(reuqst.size(), 2);
+        assertEquals(reuqst.get(0), userlist.get(1).getEmail());
+        assertEquals(reuqst.get(1), userlist.get(3).getEmail());
     }
 
     private void checkLevel(User user, boolean hasBeenUpgraded) {
@@ -166,6 +194,26 @@ class TestUserService extends UserService {
             throw new TestUserServiceException();
         }
         super.upgradeLevel(user);
+
+    }
+
+}
+
+
+class MockMailSender implements MailSender {
+    private List<String> requests = new ArrayList<>();
+
+    public List<String> getRequests() {
+        return requests;
+    }
+
+    @Override
+    public void send(SimpleMailMessage simpleMessage) throws MailException {
+        requests.add(simpleMessage.getTo()[0]);
+    }
+
+    @Override
+    public void send(SimpleMailMessage... simpleMessages) throws MailException {
 
     }
 }
