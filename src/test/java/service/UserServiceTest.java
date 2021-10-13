@@ -17,6 +17,8 @@ import user.springbook.dao.UserDao;
 import user.springbook.domain.Level;
 import user.springbook.domain.User;
 import user.springbook.service.UserService;
+import user.springbook.service.UserServiceImpl;
+import user.springbook.service.UserServiceTx;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -24,8 +26,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static user.springbook.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static user.springbook.service.UserService.MIN_RECOMMENDED_FOR_GOLD;
+import static user.springbook.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
+import static user.springbook.service.UserServiceImpl.MIN_RECOMMENDED_FOR_GOLD;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration("/applicationContext.xml")
@@ -33,6 +35,8 @@ public class UserServiceTest {
 
     @Autowired
     UserService userService;
+    @Autowired
+    UserServiceImpl userServiceImpl;
 
     @Autowired
     UserDao userDao;
@@ -92,7 +96,7 @@ public class UserServiceTest {
         }
 
         MockMailSender mockMailSender = new MockMailSender();
-        userService.setMailSender(mockMailSender);
+        userServiceImpl.setMailSender(mockMailSender);
 
         userService.upgradeLevels();
         checkLevel(userlist.get(0), false);
@@ -156,12 +160,15 @@ public class UserServiceTest {
     @Description("트랜잭션 테스트")
     @DirtiesContext
     public void upgradeAllOrNothing() {
-        UserService testUserService = new TestUserService(userlist.get(3).getId());
+        TestUserService testUserService = new TestUserService(userlist.get(3).getId());
+        testUserService.setMailSender(this.mailSender);
+        testUserService.setUserDao(this.userDao);
 
         // 빈으로 등록 할것이 아니므로 수동으로 DI 해준다.
-        testUserService.setUserDao(this.userDao);
-        testUserService.setTransactionManager(this.transactionManager);
-        testUserService.setMailSender(this.mailSender);
+        UserServiceTx userServiceTx = new UserServiceTx();
+        userServiceTx.setTransactionManager(this.transactionManager);
+        userServiceTx.setUserService(testUserService);
+
 
         userDao.deleteAll();
 
@@ -171,7 +178,7 @@ public class UserServiceTest {
         }
 
         try {
-            testUserService.upgradeLevels();
+            userServiceTx.upgradeLevels();
             fail("TestUserServiceException expected");
         } catch (TestUserServiceException | SQLException e) {
 
@@ -181,7 +188,7 @@ public class UserServiceTest {
 
 }
 
-class TestUserService extends UserService {
+class TestUserService extends UserServiceImpl {
     private String id;
 
     public TestUserService(String id) {

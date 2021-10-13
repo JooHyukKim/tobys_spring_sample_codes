@@ -1,13 +1,12 @@
 package domain;
 
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import user.springbook.domain.Level;
 import user.springbook.domain.User;
 
-import static user.springbook.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
+import static user.springbook.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
 
 public class UserTest {
     User user;
