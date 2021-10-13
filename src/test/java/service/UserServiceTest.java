@@ -1,5 +1,6 @@
 package service;
 
+import com.mysql.cj.TransactionEventHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,10 +18,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 import user.springbook.dao.UserDao;
 import user.springbook.domain.Level;
 import user.springbook.domain.User;
+import user.springbook.service.TransactionHandler;
 import user.springbook.service.UserService;
 import user.springbook.service.UserServiceImpl;
 import user.springbook.service.UserServiceTx;
 
+import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -187,26 +190,18 @@ public class UserServiceTest {
         testUserService.setUserDao(this.userDao);
 
         // 빈으로 등록 할것이 아니므로 수동으로 DI 해준다.
-        UserServiceTx userServiceTx = new UserServiceTx();
-        userServiceTx.setTransactionManager(this.transactionManager);
-        userServiceTx.setUserService(testUserService);
+        TransactionHandler txHandler = new TransactionHandler();
+        txHandler.setTarget(testUserService);
+        txHandler.setPattern("upgradeLevels");
+        txHandler.setTransactionManager(transactionManager);
 
-
-        userDao.deleteAll();
-
-        for (User user :
-                userlist) {
-            testUserService.add(user);
-        }
-
-        try {
-            userServiceTx.upgradeLevels();
-            fail("TestUserServiceException expected");
-        } catch (TestUserServiceException | SQLException e) {
-
-        }
-        checkLevel(userlist.get(1), false);
+        UserService userService = (UserService) Proxy.newProxyInstance(
+                getClass().getClassLoader()
+                , new Class[]{UserService.class}
+                , txHandler
+        );
     }
+
 
 }
 

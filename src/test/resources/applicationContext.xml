@@ -20,7 +20,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </bean>
 
     <bean id="userService" class="user.springbook.service.UserServiceTx">
-        <property name="transactionManager" ref="trasactionManager" />
+        <property name="transactionManager" ref="trasactionManager"/>
         <property name="userService" ref="userServiceImpl"/>
     </bean>
 
@@ -29,5 +29,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </bean>
 
     <bean id="mailSender" class="user.springbook.service.DummyMailSender">
+    </bean>
+
+    <bean id="message" class="user.springbook.example.MessageFactoryBean">
+        <property name="text" value="Factory Bean"/>
     </bean>
 </beans>
