@@ -107,7 +107,7 @@ public class UserService {
         mailMessage.setTo(user.getEmail());
         mailMessage.setFrom("useradmin@ksug.org");
         mailMessage.setSubject("Upgrade 안내");
-        mailMessage.setTo("사용자님의 등급이 " + user.getLevel().name() + " 으로 변경되었습니다.");
+        mailMessage.setText("사용자님의 등급이 " + user.getLevel().name() + " 으로 변경되었습니다.");
 
         this.mailSender.send(mailMessage);
     }
