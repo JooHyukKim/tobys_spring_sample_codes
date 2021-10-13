@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
-import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.mail.MailSender;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -16,17 +16,13 @@ import user.springbook.domain.Level;
 import user.springbook.domain.User;
 import user.springbook.service.UserService;
 
-import javax.sql.DataSource;
-import javax.xml.crypto.Data;
-
-import static user.springbook.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static user.springbook.service.UserService.MIN_RECOMMENDED_FOR_GOLD;
-
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static user.springbook.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
+import static user.springbook.service.UserService.MIN_RECOMMENDED_FOR_GOLD;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration("/applicationContext.xml")
@@ -34,10 +30,15 @@ public class UserServiceTest {
 
     @Autowired
     UserService userService;
+
     @Autowired
     UserDao userDao;
+
     @Autowired
     PlatformTransactionManager transactionManager;
+
+    @Autowired
+    MailSender mailSender;
 
 
     List<User> userlist;
@@ -48,11 +49,11 @@ public class UserServiceTest {
         Assertions.assertNotNull(userDao);
 
         userlist = Arrays.asList(
-                new User("user1", "user1", "1234", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0)
-                , new User("user2", "user2", "1234", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0)
-                , new User("user3", "user3", "1234", Level.SILVER, MIN_RECOMMENDED_FOR_GOLD - 1, 29)
-                , new User("user4", "user4", "1234", Level.SILVER, MIN_RECOMMENDED_FOR_GOLD, 30)
-                , new User("user5", "user5", "1234", Level.GOLD, MIN_RECOMMENDED_FOR_GOLD, 100)
+                new User("user1", "user1", "1234", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0, "beanskobe@gmail.com")
+                , new User("user2", "user2", "1234", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0, "beanskobe@gmail.com")
+                , new User("user3", "user3", "1234", Level.SILVER, MIN_RECOMMENDED_FOR_GOLD - 1, 29, "beanskobe@gmail.com")
+                , new User("user4", "user4", "1234", Level.SILVER, MIN_RECOMMENDED_FOR_GOLD, 30, "beanskobe@gmail.com")
+                , new User("user5", "user5", "1234", Level.GOLD, MIN_RECOMMENDED_FOR_GOLD, 100, "beanskobe@gmail.com")
         );
     }
 
@@ -106,13 +107,33 @@ public class UserServiceTest {
     }
 
     @Test
+    public void update() {
+        userDao.deleteAll();
+
+        User user = userlist.get(1);
+
+        userDao.add(userlist.get(1));
+
+        Assertions.assertEquals(user.getLevel(), Level.BASIC);
+
+        user.setLevel(Level.SILVER);
+
+        userDao.update(user);
+        User updatedUser1 = userDao.get(user.getId());
+        Assertions.assertEquals(Level.SILVER, updatedUser1.getLevel());
+
+    }
+
+    @Test
     @Description("트랜잭션 테스트")
+    @DirtiesContext
     public void upgradeAllOrNothing() {
         UserService testUserService = new TestUserService(userlist.get(3).getId());
 
         // 빈으로 등록 할것이 아니므로 수동으로 DI 해준다.
         testUserService.setUserDao(this.userDao);
         testUserService.setTransactionManager(this.transactionManager);
+        testUserService.setMailSender(this.mailSender);
 
         userDao.deleteAll();
 

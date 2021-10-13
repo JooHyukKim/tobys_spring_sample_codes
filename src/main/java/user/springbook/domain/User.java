@@ -7,14 +7,50 @@ public class User {
     Level level;
     int login;
     int recommend;
+    String email;
 
-    public User(String id, String name, String password, Level level, int login, int recommend) {
+    public User() {
+    }
+
+    public User(String id, String name, String password, Level level, int login, int recommend, String email) {
         this.id = id;
         this.name = name;
         this.password = password;
         this.level = level;
         this.login = login;
         this.recommend = recommend;
+        this.email = email;
+    }
+
+    public void upgradeLevel() {
+        Level nextlvl = this.level.nextLevel();
+        if (nextlvl == null) {
+            System.out.println(this.level + "은 업그레이드가 불가능합니다.");
+//            throw new IllegalStateException(this.level + "은 업그레이드가 불가능합니다.");
+        } else {
+            this.level = nextlvl;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", password='" + password + '\'' +
+                ", level=" + level +
+                ", login=" + login +
+                ", recommend=" + recommend +
+                ", email='" + email + '\'' +
+                '}';
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Level getLevel() {
@@ -57,25 +93,6 @@ public class User {
         this.name = name;
     }
 
-    public User() {
-    }
-
-    public User(String id) {
-        this.name = null;
-        this.password = null;
-        this.id = id;
-    }
-
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", password='" + password + '\'' +
-                '}';
-    }
-
     public String getPassword() {
         return password;
     }
@@ -84,13 +101,5 @@ public class User {
         this.password = password;
     }
 
-    public void upgradeLevel() {
-        Level nextlvl = this.level.nextLevel();
-        if (nextlvl == null) {
-            System.out.println(this.level + "은 업그레이드가 불가능합니다.");
-//            throw new IllegalStateException(this.level + "은 업그레이드가 불가능합니다.");
-        } else {
-            this.level = nextlvl;
-        }
-    }
+
 }

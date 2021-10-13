@@ -48,9 +48,9 @@ public class UserDaoTest {
     @BeforeEach
     public void setUpEach() {
         dao = context.getBean("userDao", UserDao.class);
-        this.user1 = new User("user1", "user1", "1234", Level.BASIC, 1, 0);
-        this.user2 = new User("user2", "user2", "1234", Level.SILVER, 55, 10);
-        this.user3 = new User("user3", "user3", "1234", Level.GOLD, 100, 40);
+        this.user1 = new User("user1", "user1", "1234", Level.BASIC, 1, 0, "beanskobe@gmail.com");
+        this.user2 = new User("user2", "user2", "1234", Level.SILVER, 55, 10, "beanskobe@gmail.com");
+        this.user3 = new User("user3", "user3", "1234", Level.GOLD, 100, 40, "beanskobe@gmail.com");
 
     }
 
@@ -98,6 +98,7 @@ public class UserDaoTest {
         assertEquals(user1.getLevel(), user2.getLevel());
         assertEquals(user1.getLogin(), user2.getLogin());
         assertEquals(user1.getRecommend(), user2.getRecommend());
+        assertEquals(user1.getEmail(), user2.getEmail());
         return true;
     }
 
@@ -107,12 +108,12 @@ public class UserDaoTest {
         dao.deleteAll();
         assertEquals(dao.getCount(), 0);
 
-        for (int i = 1; i < 6; i++) {
-            dao.add(
-                    new User("user" + i, "user" + i, "1234", Level.BASIC, 1, 0)
-            );
-            assertEquals(dao.getCount(), i);
-        }
+        dao.add(user1);
+        assertEquals(dao.getCount(), 1);
+        dao.add(user2);
+        assertEquals(dao.getCount(), 2);
+        dao.add(user3);
+        assertEquals(dao.getCount(), 3);
 
         System.out.println("getCountTest success");
 
@@ -174,20 +175,21 @@ public class UserDaoTest {
     public void findALl() throws SQLException, ClassNotFoundException {
         dao.deleteAll();
 
-        List<User> userlist = new ArrayList<>();
-        for (int i = 1; i < 12; i++) {
-            User user = new User("user" + i, "user" + i, "user" + i, user1.getLevel(), user1.getLogin(), user1.getRecommend());
-            userlist.add(user);
-            dao.add(user);
-            Assertions.assertEquals(
-                    i
-                    , dao.getAll().size()
-            );
-            isTwoUsersEqual(user, dao.get(user.getId()));
-        }
+        dao.add(user1);
+        Assertions.assertEquals(1, dao.getAll().size());
+        isTwoUsersEqual(user1, dao.get(user1.getId()));
+
+        dao.add(user2);
+        Assertions.assertEquals(2, dao.getAll().size());
+        isTwoUsersEqual(user2, dao.get(user2.getId()));
+
+        dao.add(user3);
+        Assertions.assertEquals(3, dao.getAll().size());
+        isTwoUsersEqual(user3, dao.get(user3.getId()));
+
 
         List<User> finalList = dao.getAll();
-        Assertions.assertTrue(finalList.size() == 11);
+        Assertions.assertTrue(finalList.size() == 3);
     }
 
     @Test
@@ -219,16 +221,23 @@ public class UserDaoTest {
         dao.add(user1);
         dao.add(user2);
 
-        user1.setLogin(333);
-        user1.setRecommend(321);
-        user1.setLevel(Level.GOLD);
-        user1.setPassword("4321");
-        user1.setName("주혀킴");
+        User userToUpdate = new User();
+        userToUpdate.setId(user1.getId());
+        userToUpdate.setLogin(user1.getLogin() + 2);
+        userToUpdate.setRecommend(user1.getRecommend() + 321);
+        userToUpdate.setLevel(Level.GOLD);
+        userToUpdate.setPassword(user1.getPassword() + "321");
+        userToUpdate.setName(user1.getName() + 321);
+        userToUpdate.setEmail(user1.getEmail() + 1321);
 
-        dao.update(user1);
+        dao.update(userToUpdate);
 
-        User updatedUser = dao.get(user1.getId());
-        isTwoUsersEqual(user1, updatedUser);
+        User updatedUser1 = dao.get(user1.getId());
+        assertNotEquals(user1.getEmail(), updatedUser1.getEmail());
+        assertNotEquals(user1.getLogin(), updatedUser1.getLogin());
+        assertNotEquals(user1.getLevel(), updatedUser1.getLevel());
+        assertNotEquals(user1.getPassword(), updatedUser1.getPassword());
+        assertNotEquals(user1.getName(), updatedUser1.getName());
 
         User user2same = dao.get(user2.getId());
         isTwoUsersEqual(user2, user2same);
