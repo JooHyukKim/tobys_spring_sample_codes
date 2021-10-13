@@ -71,8 +71,8 @@ public class UserDaoJdbc implements UserDao {
     }
 
 
-    public int update(User user) {
-        return this.jdbcTemplate.update("update users set name = ?, password = ?, level = ?, login = ?, recommend = ?, email = ? where id = ?",
+    public void update(User user) {
+        this.jdbcTemplate.update("update users set name = ?, password = ?, level = ?, login = ?, recommend = ?, email = ? where id = ?",
                 user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(), user.getEmail(), user.getId());
     }
 
