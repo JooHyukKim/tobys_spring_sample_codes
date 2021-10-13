@@ -28,7 +28,8 @@ public class TransactionHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (method.getName().startsWith(pattern)) return invokeInTransaction(method, args);
-        else return method.invoke(method, args);
+        return method.invoke(target, args);
+
     }
 
     private Object invokeInTransaction(Method method, Object[] args) throws Throwable {
@@ -39,9 +40,11 @@ public class TransactionHandler implements InvocationHandler {
             return ret;
         } catch (IllegalAccessException e) {
             e.printStackTrace();
+            this.transactionManager.rollback(status);
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
             e.printStackTrace();
+            this.transactionManager.rollback(status);
             throw e.getTargetException();
         }
     }

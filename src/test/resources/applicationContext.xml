@@ -19,13 +19,15 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="mailSender" ref="mailSender"/>
     </bean>
 
-    <bean id="userService" class="user.springbook.service.UserServiceTx">
-        <property name="transactionManager" ref="trasactionManager"/>
-        <property name="userService" ref="userServiceImpl"/>
-    </bean>
-
     <bean id="trasactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="userService" class="user.springbook.service.TxProxyFactoryBean">
+        <property name="target" ref="userServiceImpl"/>
+        <property name="transactionManager" ref="trasactionManager"/>
+        <property name="pattern" value="upgradeLevels"/>
+        <property name="serviceInterface" value="user.springbook.service.UserService"/>
     </bean>
 
     <bean id="mailSender" class="user.springbook.service.DummyMailSender">

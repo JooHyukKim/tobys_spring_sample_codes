@@ -1,12 +1,12 @@
 package service;
 
-import com.mysql.cj.TransactionEventHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Description;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
@@ -19,9 +19,9 @@ import user.springbook.dao.UserDao;
 import user.springbook.domain.Level;
 import user.springbook.domain.User;
 import user.springbook.service.TransactionHandler;
+import user.springbook.service.TxProxyFactoryBean;
 import user.springbook.service.UserService;
 import user.springbook.service.UserServiceImpl;
-import user.springbook.service.UserServiceTx;
 
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
@@ -39,10 +39,9 @@ import static user.springbook.service.UserServiceImpl.MIN_RECOMMENDED_FOR_GOLD;
 public class UserServiceTest {
 
     @Autowired
-    UserService userService;
+    ApplicationContext context;
     @Autowired
-    UserServiceImpl userServiceImpl;
-
+    UserService userService;
     @Autowired
     UserDao userDao;
 
@@ -182,24 +181,29 @@ public class UserServiceTest {
     }
 
     @Test
-    @Description("트랜잭션 테스트")
+    @Description("트랜잭션 테스트 TestUserService를 모킹해서 롤백이 발생하도록 설치함.")
     @DirtiesContext
-    public void upgradeAllOrNothing() {
+    public void upgradeAllOrNothing() throws Exception {
         TestUserService testUserService = new TestUserService(userlist.get(3).getId());
         testUserService.setMailSender(this.mailSender);
         testUserService.setUserDao(this.userDao);
 
         // 빈으로 등록 할것이 아니므로 수동으로 DI 해준다.
-        TransactionHandler txHandler = new TransactionHandler();
-        txHandler.setTarget(testUserService);
-        txHandler.setPattern("upgradeLevels");
-        txHandler.setTransactionManager(transactionManager);
+        TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);
+        txProxyFactoryBean.setTarget(testUserService);
+        UserService txUserService = (UserService) txProxyFactoryBean.getObject();
 
-        UserService userService = (UserService) Proxy.newProxyInstance(
-                getClass().getClassLoader()
-                , new Class[]{UserService.class}
-                , txHandler
-        );
+        userDao.deleteAll();
+        for (User user : userlist) userDao.add(user);
+        try {
+            txUserService.upgradeLevels();
+            fail("testUserServiceException excepted");
+        } catch (TestUserServiceException e) {
+
+        }
+        checkLevel(userlist.get(0), false);
+        checkLevel(userlist.get(1), false);
+        checkLevel(userlist.get(2), false);
     }
 
 
