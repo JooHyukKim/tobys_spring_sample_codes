@@ -5,10 +5,9 @@ import org.springframework.context.annotation.*;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import user.springbook.dao.UserDao;
-import user.springbook.dao.UserDaoJdbc;
 import user.springbook.service.*;
 
 import javax.sql.DataSource;
@@ -36,13 +35,28 @@ public class TobysApplicationContext {
         return tm;
     }
 
-    @Bean
-    public TransactionAdvice transactionAdvice() {
-        TransactionAdvice txAdivce = new TransactionAdvice();
-        txAdivce.setTransactionManager(transactionManager());
-
-        return txAdivce;
+    @Configuration
+    @Profile("production")
+    public static class ProductionTobysApplicationContext {
+        @Bean
+        public MailSender mailSender() {
+            JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+            mailSender.setHost("localhost");
+            return mailSender;
+        }
     }
 
+    @Configuration
+    @Profile("test")
+    public static class TestTobysApplicationContext {
+        @Bean
+        public UserService testUserService() {
+            return new TestUserService();
+        }
 
+        @Bean
+        public MailSender mailSender() {
+            return new DummyMailSender();
+        }
+    }
 }

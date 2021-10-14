@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
@@ -13,7 +12,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import user.springbook.TestTobysApplicationContext;
 import user.springbook.TobysApplicationContext;
 import user.springbook.dao.UserDao;
 import user.springbook.domain.Level;
@@ -31,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @BeforeEach 메소드에 적용.
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestTobysApplicationContext.class})
+@ContextConfiguration(classes = {TobysApplicationContext.class})
 @ActiveProfiles("test")
 public class UserDaoTest {
 

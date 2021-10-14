@@ -9,7 +9,7 @@ import user.springbook.service.UserServiceImpl;
 import java.util.List;
 
 @Service("testUserService")
-public class MockUserService extends UserServiceImpl {
+public class TestUserService extends UserServiceImpl {
     private String id = "user3";
 
     @Override

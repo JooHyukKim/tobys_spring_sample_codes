@@ -19,7 +19,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import user.springbook.TestTobysApplicationContext;
 import user.springbook.TobysApplicationContext;
 import user.springbook.dao.UserDao;
 import user.springbook.domain.Level;
@@ -38,7 +37,7 @@ import static user.springbook.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
 import static user.springbook.service.UserServiceImpl.MIN_RECOMMENDED_FOR_GOLD;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestTobysApplicationContext.class)
+@ContextConfiguration(classes = TobysApplicationContext.class)
 @ActiveProfiles("test")
 public class UserServiceTest {
 
