@@ -1,29 +1,26 @@
 package service;
 
-import org.aspectj.lang.annotation.After;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Description;
 import org.springframework.dao.TransientDataAccessException;
-import org.springframework.dao.TransientDataAccessResourceException;
-import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import user.springbook.TestTobysApplicationContext;
+import user.springbook.TobysApplicationContext;
 import user.springbook.dao.UserDao;
 import user.springbook.domain.Level;
 import user.springbook.domain.User;
@@ -32,7 +29,6 @@ import user.springbook.service.*;
 
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,7 +38,8 @@ import static user.springbook.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
 import static user.springbook.service.UserServiceImpl.MIN_RECOMMENDED_FOR_GOLD;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration("/applicationContext.xml")
+@ContextConfiguration(classes = TestTobysApplicationContext.class)
+@ActiveProfiles("test")
 public class UserServiceTest {
 
     @Autowired

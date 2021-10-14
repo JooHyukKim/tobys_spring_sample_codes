@@ -5,22 +5,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
-import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import user.springbook.TestTobysApplicationContext;
+import user.springbook.TobysApplicationContext;
 import user.springbook.dao.UserDao;
 import user.springbook.domain.Level;
 import user.springbook.domain.User;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,13 +31,15 @@ import static org.junit.jupiter.api.Assertions.*;
  * @BeforeEach 메소드에 적용.
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = "/applicationContext.xml")
+@ContextConfiguration(classes = {TestTobysApplicationContext.class})
+@ActiveProfiles("test")
 public class UserDaoTest {
 
+
     @Autowired
-    private ApplicationContext context;
+    ApplicationContext context;
+
     @Autowired
-    private DataSource dataSource;
     UserDao dao;
 
     User user1;
@@ -47,7 +48,6 @@ public class UserDaoTest {
 
     @BeforeEach
     public void setUpEach() {
-        dao = context.getBean("userDao", UserDao.class);
         this.user1 = new User("user1", "user1", "1234", Level.BASIC, 1, 0, "beanskobe@gmail.com");
         this.user2 = new User("user2", "user2", "1234", Level.SILVER, 55, 10, "beanskobe@gmail.com");
         this.user3 = new User("user3", "user3", "1234", Level.GOLD, 100, 40, "beanskobe@gmail.com");

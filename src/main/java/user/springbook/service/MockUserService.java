@@ -1,11 +1,15 @@
 package user.springbook.service;
 
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import user.springbook.domain.User;
 import user.springbook.exception.TestUserServiceException;
+import user.springbook.service.UserServiceImpl;
 
 import java.util.List;
 
-public class TestUserService extends UserServiceImpl {
+@Service("testUserService")
+public class MockUserService extends UserServiceImpl {
     private String id = "user3";
 
     @Override

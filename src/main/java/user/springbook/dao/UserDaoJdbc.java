@@ -1,8 +1,11 @@
 package user.springbook.dao;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import user.springbook.domain.Level;
 import user.springbook.domain.User;
 
@@ -11,8 +14,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+@Repository("userDao")
 public class UserDaoJdbc implements UserDao {
+
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    public void setDataSource(DataSource dataSource) {
+        jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
     private RowMapper<User> userMapper = new RowMapper<User>() {
         @Override
         public User mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -28,9 +39,6 @@ public class UserDaoJdbc implements UserDao {
         }
     };
 
-    public void setDataSource(DataSource dataSource) {
-        jdbcTemplate = new JdbcTemplate(dataSource);
-    }
 
     public void add(User user) {
         this.jdbcTemplate.update(
