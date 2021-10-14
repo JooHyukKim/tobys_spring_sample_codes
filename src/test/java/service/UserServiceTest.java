@@ -1,5 +1,6 @@
 package service;
 
+import org.aspectj.lang.annotation.After;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,11 +16,13 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import user.springbook.dao.UserDao;
 import user.springbook.domain.Level;
@@ -263,6 +266,16 @@ public class UserServiceTest {
 
     }
 
+    @Test
+    @Rollback
+    public void transactionSyncRollBackTest() {
+        userDao.deleteAll();
+        Assertions.assertEquals(0, userDao.getCount());
+        userService.add(userlist.get(0));
+        userService.add(userlist.get(1));
+        Assertions.assertEquals(2, userDao.getCount());
+
+    }
 
 }
 
