@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Description;
 import org.springframework.dao.TransientDataAccessException;
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -17,6 +18,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import user.springbook.dao.UserDao;
 import user.springbook.domain.Level;
 import user.springbook.domain.User;
@@ -40,12 +44,18 @@ public class UserServiceTest {
 
     @Autowired
     ApplicationContext context;
+
     @Autowired
     UserService userService;
+
     @Autowired
     UserService testUserService;
+
     @Autowired
     UserDao userDao;
+
+    @Autowired
+    PlatformTransactionManager transactionManager;
 
     List<User> userlist;
 
@@ -208,6 +218,51 @@ public class UserServiceTest {
             testUserService.getAll();
         });
     }
+
+
+    @Test
+    public void transactionSync() {
+        userDao.deleteAll();
+        assertEquals(0, userDao.getCount());
+
+        DefaultTransactionDefinition txDefinition = new DefaultTransactionDefinition();
+
+        TransactionStatus txStatus = transactionManager.getTransaction(txDefinition);
+
+
+        userService.add(userlist.get(0));
+        userService.add(userlist.get(1));
+
+        assertEquals(2, userDao.getCount());
+
+        transactionManager.rollback(txStatus);
+
+        assertEquals(0, userDao.getCount());
+
+
+    }
+
+    @Test
+    public void transactionSyncRollBack() {
+        userDao.deleteAll();
+        assertEquals(0, userDao.getCount());
+
+        DefaultTransactionDefinition txDefinition = new DefaultTransactionDefinition();
+
+        TransactionStatus txStatus = transactionManager.getTransaction(txDefinition);
+
+        try {
+            userService.add(userlist.get(0));
+            userService.add(userlist.get(1));
+        } finally {
+            transactionManager.rollback(txStatus);
+        }
+
+        assertEquals(0, userDao.getCount());
+
+
+    }
+
 
 }
 
