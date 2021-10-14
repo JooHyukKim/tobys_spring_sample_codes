@@ -3,7 +3,9 @@ package user.springbook.service;
 import user.springbook.domain.User;
 import user.springbook.exception.TestUserServiceException;
 
-class TestUserService extends UserServiceImpl {
+import java.util.List;
+
+public class TestUserService extends UserServiceImpl {
     private String id = "user3";
 
     @Override
@@ -14,5 +16,16 @@ class TestUserService extends UserServiceImpl {
         super.upgradeLevel(user);
 
     }
+
+
+    public List<User> getAll() {
+        for (User user :
+                super.getAll()) {
+            super.update(user);
+
+        }
+        return null;
+    }
+
 
 }

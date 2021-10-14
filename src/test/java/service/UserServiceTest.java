@@ -9,6 +9,7 @@ import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Description;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -201,68 +202,12 @@ public class UserServiceTest {
         checkLevel(userlist.get(2), false);
     }
 
-
-}
-
-
-class MockMailSender implements MailSender {
-    private List<String> requests = new ArrayList<>();
-
-    public List<String> getRequests() {
-        return requests;
-    }
-
-    @Override
-    public void send(SimpleMailMessage simpleMessage) throws MailException {
-        requests.add(simpleMessage.getTo()[0]);
-    }
-
-    @Override
-    public void send(SimpleMailMessage... simpleMessages) throws MailException {
-
-    }
-}
-
-class MockerUserDao implements UserDao {
-    private List<User> users;
-    private List<User> updated = new ArrayList<>();
-
-    public MockerUserDao(List<User> users) {
-        this.users = users;
-    }
-
-    public List<User> getUpdated() {
-        return updated;
-    }
-
-    @Override
-    public void add(User user) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public User get(String id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<User> getAll() {
-        return this.users;
-    }
-
-    @Override
-    public void deleteAll() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int getCount() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void update(User user) {
-        updated.add(user);
+    @Test
+    public void readOnlyTrasanctionAttr() {
+        Assertions.assertThrows(TransientDataAccessException.class, () -> {
+            testUserService.getAll();
+        });
     }
 
 }
+

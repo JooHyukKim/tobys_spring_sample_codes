@@ -33,23 +33,30 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <bean id="transactionAdvice" class="user.springbook.service.TransactionAdvice">
+    <tx:advice id="transactionAdvice">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <bean id="transactionAdvice" class="org.springframework.transaction.interceptor.TransactionInterceptor">
         <property name="transactionManager" ref="trasactionManager"/>
+        <property name="transactionAttributes">
+            <props>
+                <prop key="get*">PROPAGATION_REQUIRED, readOnly</prop>
+                <prop key="*">PROPAGATION_REQUIRED</prop>
+            </props>
+        </property>
     </bean>
 
-<!--    <bean id="transactionPointcut" class="org.springframework.aop.aspectj.AspectJExpressionPointcut">-->
-<!--        <property name="expression" value="execution(* *..*ServiceImpl.upgrade*(..))"/>-->
-<!--    </bean>-->
     <aop:config>
-        <aop:advisor advice-ref="transactionAdvice" pointcut="execution(* *..*ServiceImpl.upgrade*(..))"/>
+        <aop:advisor advice-ref="transactionAdvice" pointcut="bean(*Service)"/>
     </aop:config>
-    <!--    <aop:config>-->
-    <!--        <aop:pointcut id="transactionPointcut" expression="execution(* *..*ServiceImpl.upgrade*(..))"/>-->
-    <!--        <aop:advisor advice-ref="transactionAdvice" pointcut-ref="transactionPointcut"/>-->
-    <!--    </aop:config>-->
 
     <bean id="testUserService" class="user.springbook.service.TestUserService" parent="userService">
     </bean>
+
     <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
 
 </beans>

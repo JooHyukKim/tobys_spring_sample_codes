@@ -43,12 +43,6 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    public void add(User user) {
-        if (user.getLevel() == null) user.setLevel(Level.BASIC);
-        userDao.add(user);
-    }
-
-
     protected void upgradeLevel(User user) {
         if (canUpgradeLevel(user)) {
             user.upgradeLevel();
@@ -71,6 +65,34 @@ public class UserServiceImpl implements UserService {
                 throw new IllegalArgumentException("Unknown Level : " + currentLevel);
         }
     }
+
+
+    public void add(User user) {
+        if (user.getLevel() == null) user.setLevel(Level.BASIC);
+        userDao.add(user);
+    }
+
+
+    @Override
+    public User get(String id) {
+        return userDao.get(id);
+    }
+
+    @Override
+    public List<User> getAll() {
+        return userDao.getAll();
+    }
+
+    @Override
+    public void deleteAll() {
+        userDao.deleteAll();
+    }
+
+    @Override
+    public void update(User user) {
+        userDao.update(user);
+    }
+
 
     /*
         private void sendUpgradeEmail(User user) {
