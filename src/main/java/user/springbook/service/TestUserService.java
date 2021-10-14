@@ -3,7 +3,7 @@ package user.springbook.service;
 import user.springbook.domain.User;
 import user.springbook.exception.TestUserServiceException;
 
-class TestUserServiceImpl extends UserServiceImpl {
+class TestUserService extends UserServiceImpl {
     private String id = "user3";
 
     @Override
