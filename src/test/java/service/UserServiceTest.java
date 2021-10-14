@@ -176,7 +176,7 @@ public class UserServiceTest {
 
     @Test
     public void advisorProAUtoProxy() {
-        assertEquals(java.lang.reflect.Proxy.class, testUserService.getClass());
+        Assertions.assertTrue(testUserService instanceof Proxy);
     }
 
     @Test
