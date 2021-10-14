@@ -19,10 +19,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import user.springbook.dao.UserDao;
 import user.springbook.domain.Level;
 import user.springbook.domain.User;
-import user.springbook.service.TransactionHandler;
-import user.springbook.service.TxProxyFactoryBean;
-import user.springbook.service.UserService;
-import user.springbook.service.UserServiceImpl;
+import user.springbook.exception.TestUserServiceException;
+import user.springbook.service.*;
 
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
@@ -44,14 +42,9 @@ public class UserServiceTest {
     @Autowired
     UserService userService;
     @Autowired
+    UserService testUserService;
+    @Autowired
     UserDao userDao;
-
-    @Autowired
-    PlatformTransactionManager transactionManager;
-
-    @Autowired
-    MailSender mailSender;
-
 
     List<User> userlist;
 
@@ -182,49 +175,32 @@ public class UserServiceTest {
     }
 
     @Test
+    public void advisorProAUtoProxy() {
+        assertEquals(java.lang.reflect.Proxy.class, testUserService.getClass());
+    }
+
+    @Test
     @Description("트랜잭션 테스트 TestUserService를 모킹해서 롤백이 발생하도록 설치함.")
     @DirtiesContext
     public void upgradeAllOrNothing() throws Exception {
-        TestUserService testUserService = new TestUserService(userlist.get(3).getId());
-        testUserService.setMailSender(this.mailSender);
-        testUserService.setUserDao(this.userDao);
-
-        // 빈으로 등록 할것이 아니므로 수동으로 DI 해준다.
-        ProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", ProxyFactoryBean.class);
-        txProxyFactoryBean.setTarget(testUserService);
-        UserService txUserService = (UserService) txProxyFactoryBean.getObject();
-
         userDao.deleteAll();
+
         for (User user : userlist) userDao.add(user);
+
         try {
-            txUserService.upgradeLevels();
+            this.testUserService.upgradeLevels();
             fail("testUserServiceException excepted");
+
         } catch (TestUserServiceException e) {
 
         }
+        List<User> updatedUserlist = userDao.getAll();
+
         checkLevel(userlist.get(0), false);
         checkLevel(userlist.get(1), false);
         checkLevel(userlist.get(2), false);
     }
 
-
-}
-
-class TestUserService extends UserServiceImpl {
-    private String id;
-
-    public TestUserService(String id) {
-        this.id = id;
-    }
-
-    @Override
-    protected void upgradeLevel(User user) {
-        if (user.getId().equals(this.id)) {
-            throw new TestUserServiceException();
-        }
-        super.upgradeLevel(user);
-
-    }
 
 }
 
