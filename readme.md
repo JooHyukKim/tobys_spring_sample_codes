@@ -5,7 +5,7 @@
 - 학습 후 정리한 내용이며 이후 공유하고자 핵심 내용들을 정리해보았습니다.
 - 아래 내용들을 "이미" 알고 계시는 분들은 이번 내용으로 복습한다 생각하시고 훑고나서 다른 책을 읽는 것을 추천드립니다.
 
-<img src="cover.jpeg" alt="cover" title="cover" width="400" alignCenter />
+<img src="./cover.jpeg" alt="cover" title="cover" width="400" alignCenter />
 
 ## TABLE OF CONTENTS.
 
