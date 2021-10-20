@@ -1,38 +1,42 @@
-##4장 예외
+# 4장 : 예외
 
+## 예외의 종류와 특징
 
+### 자바의 Throwable 의 자식 세가지
 
-###예외의 종류와 특징
-
-
-자바의 Throwable 의 자식 세가지
 - Error
 - Exception
-  - Checked Exception
-  - Unchecked Exception ( RuntimeException을 상속 )
+    - Checked Exception
+    - Unchecked Exception ( RuntimeException을 상속 )
 
+## 예외 처리방법
 
-###예외 처리방법
+### 1 예외복구
 
-
-1 예외복구
 - 예외상황을 파악하고 문제를 해결해서 정상 상태로 돌려놓는 것이다.
-  2 예외 회피
+
+### 2 예외 회피
+
 - 자신을 호출한 쪽으로 예외를 던지는 것.
-  - throws 문으로 바로 던지던가
-  - catch 후 로그를 남기고 다시 예외를 던지는 것.
-- 에외를  회피하는 것은 복구하는 것처럼 의도가  분명해야한다.
-  3 예외 전환
+    - throws 문으로 바로 던지던가
+    - catch 후 로그를 남기고 다시 예외를 던지는 것.
+- 에외를 회피하는 것은 복구하는 것처럼 의도가 분명해야한다.
+
+### 3 예외 전환
+
 - 예외 회피와 비슷하게 예외를 복구해서 정상적인 상태로는 만들 수 없기 때문에 예외를 메소드 밖으로 던지는 것.
 - 하지만 예외 회피와 달리, 발생한 예외를 그대로 넘기는 게 아니라 적절한 예외로 전환해서 던진다는 특징이 있다.
-- 예외 전환의 목적 두가지
 
-3.1. 예외 전환 방법 및 목적 1
-- 내부에서 발생한 예외를 그대로 던지면 예외상황에 대한 적절한 의미를 부여해주지 못하는 경우에, 의미르 ㄹ분명하게 해줄 수 있는 예외로 바꿔주기 위해서.
-- 예를 들어 사용자를 추가할때 SQLException 이 발생하는 것을 채키해서 DuplicateUserIdException 같은 예외로 바꿔서 던져주기.
+### 예외 전환의 목적 두가지
+
+#### 예외 전환 방법 및 목적 1
+
+- 내부에서 발생한 예외를 그대로 던지면 예외상황에 대한 적절한 의미를 부여해주지 못하는 경우에, 의미를 분명하게 해줄 수 있는 예외로 바꿔주기 위해서.
+- 예를 들어 사용자를 추가할때 SQLException 이 발생하는 것을 체크해서 DuplicateUserIdException 같은 예외로 바꿔서 던져주기.
 - 보통 예외에 원래 발생한 예외를 담아서 충첩 예외로 만드는 것이좋다.
-- 중첩예외는 getCause() 메소드를 이용해서 처음 발생한 예외가 무엇인지 확인할 수 있다.1
-```
+- 중첩예외는 getCause() 메소드를 이용해서 처음 발생한 예외가 무엇인지 확인할 수 있다.
+ 
+``` java
 // 중첩 예외 1
 catch(SQLException e){
     throw DuplicateUserIdException(e);
@@ -43,64 +47,72 @@ catch(SQLException e){
 }
 ```
 
-
-###예외 전환 방법 및 목적 2
+#### 예외 전환 방법 및 목적 2
 
 - 예외를 처리하기 쉽고 단순하게 만들기 위해 포장하는 것이다.
 - 중첩을 예외를 이용해 새로운 예외를 만들고 원인이 되는 예외를 내부에 담아서 던지는 방식은 같다.
 - 주로 예외처리를 강제하는 체크 예외를 언체크 예외인 런타임 예외로 바꾸는 경우에 사용한다.
-```
-try {
-    // do something
-} catch (NamingException ne) {
-    throw new EJBExcpetion(ne);
-} catch (SomeCheckedException sce){
-    throw new SomeRuntimeException(sce)
-} ......
-```
-
 - 반대로 애플리케이션에서 의도적으로 던지는 예외는 체크 예외를 사용해서 적절한 대응이나 복구 작업을 진행하자.
 
+```java
+try{
+    // do something
+}catch(NamingException ne){
+    throw new EJBExcpetion(ne);
+}catch(SomeCheckedException sce){
+    throw new SomeRuntimeException(sce)
+}
+```
 
-###예외처리 전략
 
+## 예외처리 전략
 
-런타임 예외의 보편화
+### 런타임 예외의 보편화
+
 - 대응이 불가능한 체크 예외라면 빨리 런타임 예외로 전환해서 던지는게 낫다.
 - 자바 초기부터 있었던 JDK 의 API 와 달리 표준 스펙 또는 오픈소스 프레임워크에서는 API 가 발생시키는 예외를 체크예외 대신 언체크 예외로 정의하는 것이 일반화되고 있다.
 - 예전에는 복구할 가능성이 있다면 체크 예외로 만들었지만 지금은 항상 복구할 수 있는 예외가 아니라면 일단 언체크 예외로 만드는 경향이 있다.
 - 언체크 예외라도 필요하면 catch 로 처리 가능하나 대게는 복구 불가능한 상황이고 RuntimeException 등으로 포장해서 던져야 할 테니 아예 API 차원에서 런타임 예외를 던지도록 만드는 것이다.
 
+## 4.2. 예외 전환
 
-###4.2. 예외 전환
+### 예외 전환의 목적은 두가지
 
-예외 전환의 목적은 두가지
 - 하나는 런타임 예외로 전환해서 불필요한 catch throws 를 줄이고
-- 다른 하나는 로우레벨의 예외를 좀 더 의미있고 추상화된 예외로 바꾸서ㅓ 던지기.
+- 다른 하나는 로우레벨의 예외를 좀 더 의미있고 추상화된 예외로 바꿔서 던지기.
+ 
 
-JDBC에서는 DB 마다 다른 에러코드를 전부 처리 할 수가 없으므로 SQLException 으로 묶어서 던진다.
-- 그리고 SQLException 은  OpenGroup 의 XOpen SQL 스펙에 정의된 SQL 상태 코드를 따르도록 되어있다.
+> JDBC에서는 DB 마다 다른 에러코드를 전부 처리 할 수가 없으므로 SQLException 으로 묶어서 던진다.
+
+
+- 그리고 SQLException 은 OpenGroup 의 XOpen SQL 스펙에 정의된 SQL 상태 코드를 따르도록 되어있다.
 - 예를들어 통신장애는 08S01, 테이블이 존재하지 않는 경우에는 42S02와 같은 식으로 말이다.
 
-스프링에서는 JPA, iBatis 등 기술마다 달라지는 데이터 액세스 예외를 추상화하여  DataAccessException 계층 구조안에 정리해놓았다.
+> 스프링에서는 JPA, iBatis 등 기술마다 달라지는 데이터 액세스 예외를 추상화하여 DataAccessException 계층 구조안에 정리해놓았다.
 
-테스트 : 인터페이스 클래스
-- @Autowired는 스프링의 컨텍스트 내에서 정의된 빈중에서 인스턴스 변수에 주입 가능한 타입의 빈을 찾아준다.
-- 예를들어 UserDaoTest에서 dao 변수 타입을 ``` @Autowired UserDao``` 로 해주면 스프링이 알아서 등록된 빈중에서 UserDao 타입인 UserDaoJdbc(구현체) 를 찾아서 주입한다.
-- 혹은 테스트의 관심사 (구현체별로 테스트) 에 따라서 UserDaoJdbc, UserDaoHibernate 등을 사용할 수 도 있다.
+## 테스트 : 인터페이스 클래스
 
-DataAccessException 활용시 주의 사항
+- ```@Autowired```는 스프링의 컨텍스트 내에서 정의된 빈중에서 인스턴스 변수에 주입 가능한 타입의 빈을 찾아준다.
+- 예를들어 UserDaoTest에서 dao 변수 타입을 ``` @Autowired UserDao``` 로 해주면 스프링이 알아서 등록된 빈중에서 ```UserDao``` 타입인 ```UserDaoJdbc(구현체) ```를 찾아서
+  주입한다.
+- 혹은 테스트의 관심사 (구현체별로 테스트) 에 따라서 ```UserDaoJdbc```, ```UserDaoHibernate ```등을 사용할 수 도 있다.
+
+
+### DataAccessException 활용시 주의 사항
+
 - 던지는 Exception 을 잡아서 처리하는 코드를 만들려고 한다면 미리 학습테스트를 만들어서 실제로 전환되는 예외의 종류를 확인해둘 필요가 있다.
 - 왜냐하면 DataAccessException이 기술에 상관없이 추상화된 중복키 에러이지만 완벽한 해결책은 아니기때문이다.
-  - jdbc : duplciatekeyexception
-  - hibernate : ConstraintVioliationException
-  - 등 우로 나누어진다.
+    - jdbc : duplciatekeyexception
+    - hibernate : ConstraintVioliationException
+    - 등 우로 나누어진다.
 
+### 4.3. 정리
 
-###4.3. 정리
+4장에서는 엔터프라이즈 애플리케이션에서 사용할 수 있는 바람직한 예외처리 방법은 무엇인지를 살펴봤다. 또한 JDBC 예외의 단점이 무엇인지 살펴보고, 스프링이 제공하는 효과적인 데이터 액세스 기술의 예외처리 전략과
+기능에 대해서도 알아봤다.
 
+이 장에서 살펴본 내용은 다음과 같다.
 
-4장에서는 엔터프라이즈 애플리케이션에서 사용할 수 있는 바람직한 예외처리 방법은 무엇인지를 살펴봤다. 또한 JDBC 예외의 단점이 무엇인지 살펴보고, 스프링이 제공하는 효과적인 데이터 액세스 기술의 예외처리 전략과 기능에 대해서도 알아봤다. 이 장에서 살펴본 내용은 다음과 같다.
 - 예외를 잡아서 아무런 조치를 취하지 않거나 의미 없는 throws 선언을 남발하는 것은 위험하다.
 - 예외는 복구하거나 예외처리 오브젝트로 의도적으로 전달하거나 적절한 예외로 전환해야한다.
 - 좀 더 의미 있는 예외로 변경하거나, 불필요한 catch/throws를 피하기 위해 런타임 예외로 포장하는 두 가지 방법의 예외 전환이 있다.
